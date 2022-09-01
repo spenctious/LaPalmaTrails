@@ -3,271 +3,252 @@ using System;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 
-namespace lpfwAPI // concurrent
+namespace LaPalmaTrailsAPI
 {
+    /// <summary>
+    /// Performs web scraping of the official trail status page for La Palma.
+    /// 
+    /// Records:
+    /// - DateTime of when the site was scraped
+    /// - Statuses of all the recognised trails
+    /// - A collection of anomalies encountered while scraping the site
+    /// - An overall result
+    /// 
+    /// Successful scraping results are cached and refreshed if over a day old.
+    /// </summary>
     public class StatusScraper
     {
         // A thread-safe lookup table for converting Spanish URLs to English equivalents
-        private static ConcurrentDictionary<string, string> _urlMap = new();
+        private static readonly ConcurrentDictionary<string, string> _urlMap = new();
 
+        /// <summary>
+        /// Properties that can be defined by optional API call parameters
+        /// </summary>
         public string StatusPage { get; set; } = "https://www.senderosdelapalma.es/en/footpaths/situation-of-the-footpaths/"; // site to scrape
-        public int StatusPageTimeout { get; set; } = 6000; // ms
-        public int DetailPageTimeout { get; set; } = 20000; // ms
-        public bool UseCache { get; set; } = true; // 
+        public int StatusPageTimeout { get; set; } = 5000; // ms
+        public int DetailPageTimeout { get; set; } = 5000; // ms
+        public bool UseCache { get; set; } = true; // set false to guarantee a fresh result
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
 
 
         /// <summary>
-        /// Scrapes the official trail status page for trail status information.
-        /// Returns cached results if the site was scraped less than a day ago.
+        /// Reads trail status information from the official trail website.
         /// </summary>
-        /// <returns>A ScraperResult object populated with the results of the scraping operation</returns>
+        /// <returns>A ScraperResult object that records the results of the scraping operation.</returns>
         public async Task<ScraperResult> GetTrailStatuses()
         {
-            ScraperResult scraperResult = new();
+            // clear lookup table if asked to
+            if (ClearLookups)
+            {
+                _urlMap.Clear();
+            }
+            int initialUrlMapCount = _urlMap.Count;
 
-            if (ClearLookups) _urlMap.Clear();
-            int initialMapCount = _urlMap.Count;
-
+            // use the cached result if it's still valid
             if (LastResultIsStillValid)
             {
                 return CachedResult.Instance.Value;
             }
 
+
+            // scrape the status page
+            ScraperResult scraperResult = new();
             var doc = new HtmlDocument();
             try
             {
-                // get the html page source 
-                using (var httpClient = new HttpClient())
-                {
-                    httpClient.Timeout = TimeSpan.FromMilliseconds(StatusPageTimeout);
-                    var html = await httpClient.GetStringAsync(StatusPage);
-                    doc.LoadHtml(html);
-                }
+                using var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromMilliseconds(StatusPageTimeout);
+                var html = await httpClient.GetStringAsync(StatusPage);
+                doc.LoadHtml(html);
 
-                // extract the table rows that are not header rows
+
+                // ********** Find the trail status table
+
+                // extract the table rows that are not header rows and make sure we have a table to parse:
+                // in cases of general trail shutdown (fire alerts etc.) the table may be missing
                 var nodes = doc.DocumentNode.SelectNodes("//table[@id='tablepress-14']//tr[not(th)]");
                 if (nodes == null)
                 {
-                    // in cases of general trail shutdown (fire alerts etc.) the table may be missing
-                    scraperResult.RecordFatalError(
-                        ScraperEvent.EventType.DataError, 
-                        "Trail network probably closed", 
-                        "Missing table with id tablepress-14");
+                    scraperResult.DataError("Trail network probably closed", "Missing table with id tablepress-14");
+                    throw new InvalidOperationException();
                 }
-                else
+
+                // ********** Parse the table row by row
+
+                foreach (HtmlNode row in nodes)
                 {
-                    // process table rows concurrently since they may require their own slow page lookups
-                    // wait for all the results to come in before proceeding
-                    List<Task> taskList = new();
-                    foreach(var tableRow in nodes)
+                    // ********** Trail ID: 1st table column
+
+                    // trail ID examples:
+                    // - GR 130 Etapa 1, GR 131 Etapa 2
+                    // - PR LP 01, SL BV 09
+                    // - PR LP 01.1
+                    // - PR LP 02.01 (the leading 0 after the decimal is an error on their part that must be corrected)
+                    string trailId = "Unrecognised trail"; // default
+                    var trail = row.SelectSingleNode("td[position()=1]").InnerText;
+                    var match = Regex.Match(trail, @"(GR 13(0|1) Etapa \d)|((PR|SL) [A-Z][A-Z] \d{2,3}(\.0\d|\.\d|)?)");
+
+                    if (match.Success)
                     {
-                        Task runningTask = Task.Run(() => AddTrailInformation(tableRow, scraperResult));
-                        taskList.Add(runningTask);
+                        trailId = match.ToString();
+
+                        // fix the website error where some trails are misnamed with an extra leading zero
+                        if (Regex.IsMatch(trailId, @"\.\d\d$"))
+                        {
+                            trailId = trailId.Remove(trailId.Length - 2, 1);
+                        }
                     }
-                    Task.WaitAll(taskList.ToArray());
+                    else
+                    {
+                        // trail does not match any recognised trail pattern
+                        scraperResult.AddAnomaly(ScraperEvent.EventType.UnrecognisedTrailId, trailId, trail.Trim());
+                    }
+
+                    // ********** Trail URL: 1st table column
+
+                    // get the Spanish trail url
+                    // if successful overwrite with the English version or best alternative
+                    string trailUrl = StatusPage; // default
+                    var link = row.SelectSingleNode("td[position()=1]//a[@href]");
+                    string scrapedUrl = link == null ? "failed" : link.GetAttributeValue("href", "failed");
+
+                    if (scrapedUrl == "failed")
+                    {
+                        // the trail ID column doesn't appear to have a valid link
+                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, "No link to route detail");
+                    }
+                    else
+                    {
+                        // we don't want to link to large PDFs or inappropriate GPX files in ZIP format
+                        // so skip and use the default
+                        if (scrapedUrl.EndsWith(".pdf") || scrapedUrl.EndsWith(".zip"))
+                        {
+                            scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, scrapedUrl);
+                        }
+                        else
+                        {
+                            trailUrl = await GetEnglishUrl(trailId, scrapedUrl, scraperResult);
+                        }
+                    }
+
+
+                    // ********** Trail status: 3rd table column:
+
+                    // N.B. some entries have additional line breaks that have to be catered for
+                    const string openPattern = "Abierto / Open / Geöffnet";
+                    const string completelyOpenPattern = @"^Abierto / Open / Geöffnet(<br />)?$";
+                    const string closedPattern = "Cerrado / Closed / Gesperrt";
+
+                    string trailStatus = "Unknown"; // default
+                    var status = row.SelectSingleNode("td[position()=3]").InnerText;
+                    if (Regex.IsMatch(status, openPattern))
+                    {
+                        if (Regex.IsMatch(status, completelyOpenPattern))
+                        {
+                            trailStatus = "Open";
+                        }
+                        else
+                        {
+                            trailStatus = "Part open";
+                        }
+                    }
+                    else if (Regex.IsMatch(status, closedPattern))
+                    {
+                        trailStatus = "Closed";
+                    }
+                    else
+                    {
+                        // trail status isn't clearly marked as open or closed
+                        scraperResult.AddAnomaly(ScraperEvent.EventType.UnreadableStatus, trailId, status);
+                    }
+
+
+                    // only add valid trails
+                    if (trailId != "Unrecognised trail")
+                    {
+                        scraperResult.AddTrailStatus(trailId, trailStatus, trailUrl);
+                    }
 
                     // successful scraping
-                    scraperResult.Result.Type       = ScraperEvent.EventType.Success.ToString();
-                    scraperResult.Result.Message    = $"{_urlMap.Count - initialMapCount} additional page lookups";
-                    scraperResult.Result.Detail     = $"{scraperResult.Anomalies.Count} anomalies found";
-                    scraperResult.LastScraped       = DateTime.Now;
+                    scraperResult.Success(
+                        $"{_urlMap.Count - initialUrlMapCount} additional page lookups",
+                        $"{scraperResult.Anomalies.Count} anomalies found");
 
-                    // cache result
+                    // update cache
                     CachedResult.Instance.Value = scraperResult;
                 }
+            }
+            catch (InvalidOperationException)
+            {
+                // scraper result should be set before throw for specific circumstances
             }
             catch (TaskCanceledException ex)
             {
                 // handle timeouts
-                scraperResult.RecordFatalError(
-                    ScraperEvent.EventType.Timeout,
-                    ex.Message,
-                    StatusPage);
+                scraperResult.Timeout(ex.Message, StatusPage);
             }
             catch (Exception ex)
             {
-                scraperResult.RecordFatalError(
-                    ScraperEvent.EventType.Exception,
-                    "Cannot read data",
-                    ex.Message);
+                scraperResult.Exception("Cannot read data", ex.Message);
             }
 
             return scraperResult;
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rowIndex"></param>
-        /// <param name="tableRow"></param>
-        /// <param name="scraperResult"></param>
-        /// <returns></returns>
-        private async Task AddTrailInformation(HtmlNode tableRow, ScraperResult scraperResult)
-        {
-            // set defaults
-            string trailId = "Unrecognised trail";
-            string trailStatus = "Unknown";
-
-            // get the trail id - first table column
-            var trail = tableRow.SelectSingleNode("td[position()=1]").InnerText;
-            var match = Regex.Match(trail, @"(GR 13(0|1) Etapa \d)|((PR|SL) [A-Z][A-Z] \d{2,3}(\.0\d|\.\d|)?)");
-            if (match.Success)
-            {
-                trailId = match.ToString();
-
-                // fix the website error where some trails are misnamed with an extra leading zero
-                if (Regex.IsMatch(trailId, @"\.\d\d$"))
-                {
-                    trailId = trailId.Remove(trailId.Length - 2, 1);
-                }
-            }
-            else
-            {
-                // trail does not match any recognised trail pattern
-                scraperResult.AddAnomaly(ScraperEvent.EventType.UnrecognisedTrailId, trailId, trail.Trim());
-            }
-
-
-            // attempt to retrieve the English language version of the route page
-            // if unsuccessful just link back to the status page
-            string trailUrl = StatusPage; // default
-            var link = tableRow.SelectSingleNode("td[position()=1]//a[@href]");
-            if (link == null)
-            {
-                scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, "No link to route detail");
-            }
-            else
-            {
-                string scrapedUrl = link.GetAttributeValue("href", "failed");
-                if (scrapedUrl == "failed")
-                {
-                    // revert to default and report
-                    scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, scrapedUrl);
-                }
-                else
-                {
-                    trailUrl = await GetEnglishUrl(trailId, scrapedUrl, scraperResult);
-                }
-            }
-
-
-            // get the trail status - 3rd table column:
-            // N.B. some entries have additional line breaks that have to be catered for
-            const string openPattern = "Abierto / Open / Geöffnet";
-            const string closedPattern = "Cerrado / Closed / Gesperrt";
-            const string completelyOpenPattern = @"^Abierto / Open / Geöffnet(<br />)?$";
-
-            var status = tableRow.SelectSingleNode("td[position()=3]").InnerText;
-            if (Regex.IsMatch(status, openPattern))
-            {
-                if (Regex.IsMatch(status, completelyOpenPattern))
-                {
-                    trailStatus = "Open";
-                }
-                else
-                {
-                    // more in the column than just a statement that it is open - means some sort of qualification
-                    trailStatus = "Part open";
-                }
-            }
-            else if (Regex.IsMatch(status, closedPattern))
-            {
-                trailStatus = "Closed";
-            }
-            else
-            {
-                // trail status isn't clearly marked as open or closed - default 'Unknown' used
-                scraperResult.AddAnomaly(ScraperEvent.EventType.UnreadableStatus, trailId, status);
-            }
-
-            // only add valid trails
-            if (trailId != "Unrecognised trail")
-            {
-                scraperResult.AddTrailStatus(trailId, trailStatus, trailUrl);
-            }
-        }
-
 
         /// <summary>
-        /// Provides an English Language equivalent link from the given Spanish link or the trail status lookup page link if not available.
-        /// If no value is found in the local cache the link will be sourced from the Spanish page and added to the cache.
-        /// PDF and ZIP file links are not suitable for return so are substituted with the trail status page.
+        /// Scrapes the Spanish route detail page to extract the link to the English language version of the page
         /// </summary>
-        /// <param name="rowIndex">Row number in the trail status page</param>
-        /// <param name="routeId">The already parsed route ID</param>
-        /// <param name="spanishUrl">The original link to the Spanish page</param>
-        /// <param name="scraperResult">The scraper result object to which any anomalies found will be added.</param>
-        /// <returns>The most appropriate trail link based on the given Spanish URL</returns>
-        private async Task<string> GetEnglishUrl(string routeId, string spanishUrl, ScraperResult scraperResult)
+        /// <param name="routeId">The route ID already scraped - used for anomaly recording purposes only.</param>
+        /// <param name="spanishUrl">The link to scrape for the English version.</param>
+        /// <param name="scraperResult">The ScraperResult to which any anomalies found are to be added.</param>
+        /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
+        public async Task<string> GetEnglishUrl(string routeId, string spanishUrl, ScraperResult scraperResult)
         {
-            // we don't want to link to large PDFs or inappropriate GPX files in ZIP format - return default
-            if (spanishUrl.EndsWith(".pdf") || spanishUrl.EndsWith(".zip"))
+            string? detailLink; // null by default
+
+            // if we already have an English version get it, otherwise try to scrape it
+            if (!_urlMap.TryGetValue(spanishUrl, out detailLink))
             {
-                scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, routeId, spanishUrl);
-
-                return StatusPage;
-            }
-
-            // if we already have an English version return it
-            if (_urlMap.ContainsKey(spanishUrl))
-            {
-                return _urlMap.GetValueOrDefault(spanishUrl, StatusPage);
-            }
-
-
-            // no English entry in dictionary yet so try to read it from the Spanish URL
-            string englishUrl = StatusPage;
-            var doc = new HtmlDocument();
-            try
-            {
-                // get the html page source 
-                using (var httpClient = new HttpClient())
+                var doc = new HtmlDocument();
+                try
                 {
+                    // get the html page source 
+                    using var httpClient = new HttpClient();
                     httpClient.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
                     var html = await httpClient.GetStringAsync(spanishUrl);
-
-                    // get the page as a HTML document
                     doc.LoadHtml(html);
 
-                    // look for the link to the English language version of thepage
-                    var linkNode = doc.DocumentNode.SelectSingleNode("//link[@rel='alternate'][@hreflang='en-us']");
-                    string link = linkNode.GetAttributeValue("href", "failed");
+                    // look for the link to the English language version of the page
+                    var link = doc.DocumentNode.SelectSingleNode("//link[@rel='alternate'][@hreflang='en-us']");
 
-                    // add link to dictionary or log it as an anomaly if not found
-                    if (link == "failed")
+                    string englishUrl = link == null ? "failed" : link.GetAttributeValue("href", "failed");
+                    if (englishUrl == "failed")
                     {
-                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, "English URL not found",spanishUrl);
+                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, "English URL not found", spanishUrl);
                     }
                     else
                     {
-                        // success - add to dictionary 
-                        englishUrl = link;
-                        if (!_urlMap.TryAdd(spanishUrl, englishUrl))
-                        {
-                            scraperResult.AddAnomaly(ScraperEvent.EventType.Unexpected, "Couldn't add to dictionary or already there", spanishUrl);
-                        }
+                        _urlMap.TryAdd(spanishUrl, englishUrl); // ignore result - if key is already there then the value should be the same
+                        detailLink = englishUrl;
                     }
                 }
-            }
-            // lookup failures are not fatal so record them as anomalies
-            catch (TaskCanceledException ex)
-            {
-                scraperResult.AddAnomaly(ScraperEvent.EventType.Timeout, ex.Message, spanishUrl);
-            }
-            catch (Exception ex)
-            {
-                scraperResult.AddAnomaly(
-                    ScraperEvent.EventType.Exception, 
-                    ex.Message,
-                    spanishUrl);
+                // lookup failures are not fatal so record them as anomalies
+                catch (TaskCanceledException ex)
+                {
+                    scraperResult.AddAnomaly(ScraperEvent.EventType.Timeout, ex.Message, spanishUrl);
+                }
+                catch (Exception ex)
+                {
+                    scraperResult.AddAnomaly(ScraperEvent.EventType.Exception, ex.Message, spanishUrl);
+                }
             }
 
-            return englishUrl;
+            return detailLink ?? StatusPage; // Return defaut if detail link not found
         }
+
 
 
         /// <summary>
