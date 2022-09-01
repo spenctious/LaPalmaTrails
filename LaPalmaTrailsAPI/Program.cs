@@ -25,6 +25,7 @@ app.UseCors(builder =>
     string[] allowedOrigins = 
     {
         "http://127.0.0.1:5500",                    // localhost for testing
+        "http://127.0.0.1:5501",                    // localhost for testing
         "https://lapalmaforwalkers.netlify.app",    // netlify
         "https://spenctious.github.io/lapalma/"     // github
     };
