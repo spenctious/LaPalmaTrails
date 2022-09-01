@@ -151,6 +151,9 @@ namespace LaPalmaTrailsAPI
                         else
                         {
                             trailStatus = "Part open";
+
+                            // link to the status page as this is where further details can be found
+                            trailUrl = StatusPage;
                         }
                     }
                     else if (Regex.IsMatch(status, closedPattern))
