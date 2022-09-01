@@ -1,4 +1,4 @@
-﻿namespace lpfwAPI
+﻿namespace LaPalmaTrailsAPI
 {
     /// <summary>
     /// Lazy thread-safe singleton implementation to cache a ScraperResult
