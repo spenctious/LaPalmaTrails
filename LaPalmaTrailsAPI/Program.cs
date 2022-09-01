@@ -1,11 +1,9 @@
-// Add services to the container.
+using LaPalmaTrailsAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors();
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,7 +20,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(builder =>
 {
-    string[] allowedOrigins = 
+    string[] allowedOrigins =
     {
         "http://127.0.0.1:5500",                    // localhost for testing
         "http://127.0.0.1:5501",                    // localhost for testing
@@ -38,6 +36,14 @@ app.UseCors(builder =>
 app.UseAuthorization();
 
 app.MapControllers();
+
+// make an initial call to build the Spanish to English URL map - this will be very slow!
+// don't do it in dev though as it will use the defaults and scrape live data
+if (!app.Environment.IsDevelopment())
+{
+    StatusScraper statusScraper = new();
+    await statusScraper.GetTrailStatuses();
+}
 
 app.Run();
 
