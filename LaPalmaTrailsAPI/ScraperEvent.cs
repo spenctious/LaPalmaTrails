@@ -1,32 +1,34 @@
-﻿namespace lpfwAPI
+﻿namespace LaPalmaTrailsAPI
 {
-    // Records scraping errors
+    /// <summary>
+    /// Records scraping events: successful outcomes, errors and anomalies
+    /// </summary>
     public class ScraperEvent
     {
-        public enum EventType 
-        { 
-            // error values
+        public enum EventType
+        {
+            // ok
             Success,
-            Exception, 
-            Timeout, 
+
+            // errors
+            Exception,
+            Timeout,
             DataError,
 
-            // anomaly values
-            BadRouteLink, 
-            UnrecognisedTrailId, 
-            UnreadableStatus,
-            Unexpected
+            // anomalies
+            BadRouteLink,
+            UnrecognisedTrailId,
+            UnreadableStatus
         };
 
-        public string Type { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string Detail { get; set; } = string.Empty;
+        public string Type { get; }
+        public string Message { get; } = string.Empty;
+        public string Detail { get; } = string.Empty;
 
+        // Default event is success
         public ScraperEvent()
         {
             Type = EventType.Success.ToString();
-            Message = "";
-            Detail = "";
         }
 
 
