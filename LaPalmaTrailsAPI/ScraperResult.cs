@@ -1,11 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using static lpfwAPI.ScraperEvent;
 
-namespace lpfwAPI
+namespace LaPalmaTrailsAPI
 {
     public class ScraperResult
     {
-        private readonly ScraperEvent result = new();
+        private ScraperEvent result = new();
         private readonly ConcurrentBag<TrailStatus> statuses = new();
         private readonly ConcurrentBag<ScraperEvent> anomalies = new();
 
@@ -20,24 +19,41 @@ namespace lpfwAPI
             LastScraped = DateTime.MinValue; 
         }
 
-        public void RecordFatalError(ScraperEvent.EventType type, string message, string detail)
+        // ************* Successful result
+
+        public void Success(string message, string detail)
         {
-            lock(Result)
-            {
-                result.Type = type.ToString();
-                result.Message = message;
-                result.Detail = detail;
-            }
+            result = new ScraperEvent(ScraperEvent.EventType.Success, message, detail);
+            LastScraped = DateTime.Now;
         }
 
-        public void AddAnomaly(EventType type, string message, string detail)
+        // ************* Failure results
+
+        public void Exception(string message, string detail)
         {
-            anomalies.Add(new ScraperEvent(type, message, detail));
+            result = new ScraperEvent(ScraperEvent.EventType.Exception, message, detail);
         }
 
-        public void AddTrailStatus(string trail, string status, string url)
+        public void Timeout(string message, string detail)
         {
-            statuses.Add(new TrailStatus(trail, status, url));
+            result = new ScraperEvent(ScraperEvent.EventType.Timeout, message, detail);
+        }
+
+        public void DataError(string message, string detail)
+        {
+            result = new ScraperEvent(ScraperEvent.EventType.DataError, message, detail);
+        }
+
+        // ************* Successful scraping events and anomalies
+
+        public void AddAnomaly(ScraperEvent.EventType type, string name, string details)
+        {
+            anomalies.Add(new ScraperEvent(type, name, details));
+        }
+
+        public void AddTrailStatus(string trailName, string trailStatus, string url)
+        {
+            statuses.Add(new TrailStatus(trailName, trailStatus, url));
         }
     }
 }
