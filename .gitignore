@@ -396,3 +396,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/LaPalmaTrailsAPI/.config/dotnet-tools.json
