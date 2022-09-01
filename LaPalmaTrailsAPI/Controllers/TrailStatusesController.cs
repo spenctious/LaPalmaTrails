@@ -19,15 +19,15 @@ namespace lpfwAPI.Controllers
             {
             try
                 {
-                    var statusScraper = new StatusScraper();
-                    // override defaults with parameter values if set
-                    if (statusPage != null) { statusScraper.StatusPage = statusPage; }
-                    if (statusPageTimeout != null) { statusScraper.StatusPageTimeout = (int)statusPageTimeout; }
-                    if (detailPageTimeout != null) { statusScraper.DetailPageTimeout = (int)detailPageTimeout; }
-                    if (useCache != null) { statusScraper.UseCache = (bool)useCache; }
-                    if (clearLookups != null) { statusScraper.ClearLookups = (bool)clearLookups; }
+                var statusScraper = new StatusScraper();
+                // override defaults with parameter values if set
+                if (statusPage != null) { statusScraper.StatusPage = statusPage; }
+                if (statusPageTimeout != null) { statusScraper.StatusPageTimeout = (int)statusPageTimeout; }
+                if (detailPageTimeout != null) { statusScraper.DetailPageTimeout = (int)detailPageTimeout; }
+                if (useCache != null) { statusScraper.UseCache = (bool)useCache; }
+                if (clearLookups != null) { statusScraper.ClearLookups = (bool)clearLookups; }
 
-                    var scraperResult = await statusScraper.GetTrailStatuses();
+                var scraperResult = await statusScraper.GetTrailStatuses();
                 return Ok(scraperResult);
             }
             catch (Exception e)
