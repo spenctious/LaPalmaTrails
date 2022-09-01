@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LaPalmaTrailsAPI;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace lpfwAPI.Controllers
+namespace LaPalmaTrailsAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -11,21 +12,23 @@ namespace lpfwAPI.Controllers
     {
         [HttpGet]
         public async Task<IActionResult> Get(
-            string? statusPage = null,
-            int? statusPageTimeout = null,
-            int? detailPageTimeout = null,
-            bool? useCache = null,
-            bool? clearLookups = null)
-            {
+            // optional parameters - mainly used for testing
+            string? statusPage = null,      // override default page to scrape (test only)
+            int? statusPageTimeout = null,  // override the default timeout (mainly for testing)
+            int? detailPageTimeout = null,  // override the default timeout (mainly for testing)
+            bool? useCache = null,          // set to true to ignore the cache and scrape the page fresh (mainly test)
+            bool? clearLookups = null)      // set to true to force force the lookup table to be rebuilt (test only)
+        {
             try
-                {
-                var statusScraper = new StatusScraper();
+            {
+                StatusScraper statusScraper = new();
+
                 // override defaults with parameter values if set
-                if (statusPage != null) { statusScraper.StatusPage = statusPage; }
-                if (statusPageTimeout != null) { statusScraper.StatusPageTimeout = (int)statusPageTimeout; }
-                if (detailPageTimeout != null) { statusScraper.DetailPageTimeout = (int)detailPageTimeout; }
-                if (useCache != null) { statusScraper.UseCache = (bool)useCache; }
-                if (clearLookups != null) { statusScraper.ClearLookups = (bool)clearLookups; }
+                if (statusPage != null)         { statusScraper.StatusPage          = statusPage; }
+                if (statusPageTimeout != null)  { statusScraper.StatusPageTimeout   = (int)statusPageTimeout; }
+                if (detailPageTimeout != null)  { statusScraper.DetailPageTimeout   = (int)detailPageTimeout; }
+                if (useCache != null)           { statusScraper.UseCache            = (bool)useCache; }
+                if (clearLookups != null)       { statusScraper.ClearLookups        = (bool)clearLookups; }
 
                 var scraperResult = await statusScraper.GetTrailStatuses();
                 return Ok(scraperResult);
