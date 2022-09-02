@@ -4,7 +4,7 @@ An API for trail status information for the Canary island of La Palma
 
 ## Usage
 
-The API exposes only one GET method at endpoint `/api/TrailStatuses`
+The API exposes only one GET method at endpoint `https://lapalmatrailstatusapi.azurewebsites.net/api/TrailStatuses`
 
 ## Optional parameters
 
