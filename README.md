@@ -9,7 +9,7 @@ The API exposes only one GET method at endpoint `https://lapalmatrailstatusapi.a
 ## Optional parameters
 
 Optional parameters are provided mainly for testing:
-| Parameter | Default | Useage |
+| Parameter | Default | Usage |
 |-----------|---------|--------|
 | statusPage | https://www.senderosdelapalma.es/en/footpaths/situation-of-the-footpaths/ | testing only |
 | statusPageTimeout | 6s | mainly testing |
