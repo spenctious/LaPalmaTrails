@@ -42,9 +42,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// make an initial call to build the Spanish to English URL map - this will be very slow!
-// don't do it in dev though as it will use the defaults and scrape live data
-if (!app.Environment.IsDevelopment())
+// try to populate the URL lookup table from file but if that fails build it from an initial scrape
+if (!StatusScraper.LoadUrlLookupTable())
 {
     StatusScraper statusScraper = new();
     await statusScraper.GetTrailStatuses();
