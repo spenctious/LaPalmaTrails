@@ -5,7 +5,27 @@
     /// </summary>
     public sealed class CachedResult
     {
-        public ScraperResult Value { get; set; } = new();
+        private ScraperResult _result = new();
+        private readonly object _padlock = new();
+
+        public ScraperResult Value
+        {
+            get
+            {
+                lock (_padlock)
+                {
+                    return _result;
+                }
+            }
+
+            set
+            {
+                lock (_padlock)
+                {
+                    _result = value;
+                }
+            }
+        }
 
         private static readonly Lazy<CachedResult> lazy = new Lazy<CachedResult>(() => new());
 
