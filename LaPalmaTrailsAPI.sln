@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LaPalmaTrailsAPI", "LaPalmaTrailsAPI\LaPalmaTrailsAPI.csproj", "{EF3C6D7E-5496-4D4C-BCE9-98B44B87784E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaPalmaTrailsAPI.Tests", "LaPalmaTrailsAPI.Tests\LaPalmaTrailsAPI.Tests.csproj", "{A9D450CA-4934-4C22-89F2-E145BD94EEA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EF3C6D7E-5496-4D4C-BCE9-98B44B87784E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF3C6D7E-5496-4D4C-BCE9-98B44B87784E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF3C6D7E-5496-4D4C-BCE9-98B44B87784E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9D450CA-4934-4C22-89F2-E145BD94EEA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9D450CA-4934-4C22-89F2-E145BD94EEA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9D450CA-4934-4C22-89F2-E145BD94EEA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9D450CA-4934-4C22-89F2-E145BD94EEA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
