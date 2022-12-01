@@ -16,7 +16,19 @@ namespace LaPalmaTrailsAPI.Tests
 
         private bool TrailFound(List<TrailStatus> trailList, string status, string url, string name)
         {
-            return trailList.Find(t => t.Status == status && t.Url== url && t.Name == name) != null;
+            return trailList.Find(t => 
+                t.Status == status && 
+                t.Url == url && 
+                t.Name == name) != null;
+        }
+
+
+        private bool UnrecognisedTrailAnomaly(List<ScraperEvent> eventList, string detail)
+        {
+            return eventList.Find(t => 
+                t.Type == ScraperEvent.EventType.UnrecognisedTrailId.ToString() && 
+                t.Message == "Unrecognised trail" && 
+                t.Detail == detail) != null;
         }
 
 
@@ -82,6 +94,25 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 01"));
             Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 200"));
         }
+
+        [Fact]
+        public async Task Invalid_paths_recorded_as_anomalies()
+        {
+            StatusScraper sut = CreateStatusScraper("Invalid_trails.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal(5, scraperResult.Anomalies.Count);
+            Assert.Empty(scraperResult.Trails);
+
+            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PR 130 Etapa 1"));
+            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "GR 120 Etapa 1"));
+            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "GR 130.1"));
+            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PL LP 12"));
+            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PR LP 1"));
+        }
+
 
     }
 }
