@@ -14,6 +14,12 @@ namespace LaPalmaTrailsAPI.Tests
         }
 
 
+        private bool TrailFound(List<TrailStatus> trailList, string status, string url, string name)
+        {
+            return trailList.Find(t => t.Status == status && t.Url== url && t.Name == name) != null;
+        }
+
+
         [Fact]
         public async Task Valid_GR_paths_recognised()
         {
@@ -25,15 +31,8 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal(2, scraperResult.Trails.Count);
             Assert.Empty(scraperResult.Anomalies);
 
-            // N.B. scraper results are listed in reverse order to their appearance in the test file
-
-            Assert.Equal("Open",                            scraperResult.Trails[0].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[0].Url);
-            Assert.Equal("GR 131 Etapa 1",                  scraperResult.Trails[0].Name);
-
-            Assert.Equal("Open",                            scraperResult.Trails[1].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[1].Url);
-            Assert.Equal("GR 130 Etapa 1",                  scraperResult.Trails[1].Name);
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "GR 130 Etapa 1"));
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "GR 131 Etapa 1"));
         }
 
 
@@ -48,19 +47,9 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal(3, scraperResult.Trails.Count);
             Assert.Empty(scraperResult.Anomalies);
 
-            // N.B. scraper results are listed in reverse order to their appearance in the test file
-
-            Assert.Equal("Open",                            scraperResult.Trails[0].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[0].Url);
-            Assert.Equal("PR LP 02.1",                      scraperResult.Trails[0].Name);
-
-            Assert.Equal("Open",                            scraperResult.Trails[1].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[1].Url);
-            Assert.Equal("PR LP 200",                       scraperResult.Trails[1].Name);
-
-            Assert.Equal("Open",                            scraperResult.Trails[2].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[2].Url);
-            Assert.Equal("PR LP 01",                        scraperResult.Trails[2].Name);
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 01"));
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 200"));
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 02.1"));
         }
 
 
@@ -75,9 +64,7 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Single(scraperResult.Trails);
             Assert.Empty(scraperResult.Anomalies);
 
-            Assert.Equal("Open",                            scraperResult.Trails[0].Status);
-            Assert.Equal("Link_to_English_version.html",    scraperResult.Trails[0].Url);
-            Assert.Equal("PR LP 03.1",                      scraperResult.Trails[0].Name);
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 03.1"));
         }
 
 
@@ -92,15 +79,8 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal(2, scraperResult.Trails.Count);
             Assert.Empty(scraperResult.Anomalies);
 
-            // N.B. scraper results are listed in reverse order to their appearance in the test file
-
-            Assert.Equal("Open", scraperResult.Trails[0].Status);
-            Assert.Equal("Link_to_English_version.html", scraperResult.Trails[0].Url);
-            Assert.Equal("SL BV 200", scraperResult.Trails[0].Name);
-
-            Assert.Equal("Open", scraperResult.Trails[1].Status);
-            Assert.Equal("Link_to_English_version.html", scraperResult.Trails[1].Url);
-            Assert.Equal("SL BV 01", scraperResult.Trails[1].Name);
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 01"));
+            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 200"));
         }
 
     }
