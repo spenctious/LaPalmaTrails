@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using Newtonsoft.Json;
+using System.Reflection.PortableExecutable;
 
 namespace LaPalmaTrailsAPI
 {
@@ -168,7 +169,7 @@ namespace LaPalmaTrailsAPI
                         }
                         else
                         {
-                            trailUrl = await GetEnglishUrl(trailId, scrapedUrl, scraperResult);
+                            trailUrl = await GetEnglishUrl(webReader, trailId, scrapedUrl, scraperResult);
                         }
                     }
 
@@ -254,7 +255,7 @@ namespace LaPalmaTrailsAPI
         /// <param name="spanishUrl">The link to scrape for the English version.</param>
         /// <param name="scraperResult">The ScraperResult to which any anomalies found are to be added.</param>
         /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
-        public async Task<string> GetEnglishUrl(string routeId, string spanishUrl, ScraperResult scraperResult)
+        public async Task<string> GetEnglishUrl(IWebReader webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
         {
             string? detailLink; // null by default
 
@@ -266,8 +267,8 @@ namespace LaPalmaTrailsAPI
                 {
                     // get the html page source 
                     using var httpClient = new HttpClient();
-                    httpClient.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
-                    var html = await httpClient.GetStringAsync(spanishUrl);
+                    webReader.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
+                    var html = await webReader.GetStringAsync(spanishUrl);
                     doc.LoadHtml(html);
 
                     // look for the link to the English language version of the page
