@@ -28,7 +28,7 @@ namespace LaPalmaTrailsAPI.Controllers
                 if (useCache != null)           { statusScraper.UseCache            = (bool)useCache; }
                 if (clearLookups != null)       { statusScraper.ClearLookups        = (bool)clearLookups; }
 
-                var scraperResult = await statusScraper.GetTrailStatuses();
+                var scraperResult = await statusScraper.GetTrailStatuses(new WebReader());
                 return Ok(scraperResult);
             }
             catch (Exception e)

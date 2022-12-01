@@ -46,7 +46,7 @@ app.MapControllers();
 if (!StatusScraper.LoadUrlLookupTable())
 {
     StatusScraper statusScraper = new();
-    await statusScraper.GetTrailStatuses();
+    await statusScraper.GetTrailStatuses(new WebReader());
 }
 
 app.Run();

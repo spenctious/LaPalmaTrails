@@ -76,7 +76,7 @@ namespace LaPalmaTrailsAPI
         /// Reads trail status information from the official trail website.
         /// </summary>
         /// <returns>A ScraperResult object that records the results of the scraping operation.</returns>
-        public async Task<ScraperResult> GetTrailStatuses()
+        public async Task<ScraperResult> GetTrailStatuses(IWebReader webReader)
         {
             // clear lookup table if asked to
             if (ClearLookups)
@@ -97,9 +97,9 @@ namespace LaPalmaTrailsAPI
             var doc = new HtmlDocument();
             try
             {
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromMilliseconds(StatusPageTimeout);
-                var html = await httpClient.GetStringAsync(StatusPage);
+                //using var httpClient = new HttpClient();
+                webReader.Timeout = TimeSpan.FromMilliseconds(StatusPageTimeout);
+                var html = await webReader.GetStringAsync(StatusPage);
                 doc.LoadHtml(html);
 
 
