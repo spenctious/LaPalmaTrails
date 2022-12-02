@@ -14,26 +14,8 @@ namespace LaPalmaTrailsAPI.Tests
         }
 
 
-        private bool TrailFound(List<TrailStatus> trailList, string status, string url, string name)
-        {
-            return trailList.Find(t => 
-                t.Status == status && 
-                t.Url == url && 
-                t.Name == name) != null;
-        }
-
-
-        private bool UnrecognisedTrailAnomaly(List<ScraperEvent> eventList, string detail)
-        {
-            return eventList.Find(t => 
-                t.Type == ScraperEvent.EventType.UnrecognisedTrailId.ToString() && 
-                t.Message == "Unrecognised trail" && 
-                t.Detail == detail) != null;
-        }
-
-
         [Fact]
-        public async Task Missing_status_table_creates_data_error()
+        public async Task Invalid_status_table_creates_data_error()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_Table.html");
 
@@ -43,93 +25,104 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Empty(scraperResult.Trails);
             Assert.Empty(scraperResult.Anomalies);
 
-            Assert.Equal(ScraperEvent.EventType.DataError.ToString(),   scraperResult.Result.Type);
+            Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
             Assert.Equal("Trail network probably closed",               scraperResult.Result.Message);
-            Assert.Equal("Missing table with id tablepress-14",         scraperResult.Result.Detail);
+            Assert.Equal("Missing table with id tablepress-14", scraperResult.Result.Detail);
         }
 
 
         [Fact]
-        public async Task Valid_GR_paths_recognised()
+        public async Task Valid_trail_scraped_creates_trail_and_success_result()
         {
-            StatusScraper sut = CreateStatusScraper("Valid_GR_trails.html");
-
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
-
-            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal(2, scraperResult.Trails.Count);
-            Assert.Empty(scraperResult.Anomalies);
-
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "GR 130 Etapa 1"));
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "GR 131 Etapa 1"));
+            Assert.False(true);
         }
 
 
         [Fact]
-        public async Task Valid_PR_paths_recognised()
+        public async Task Invalid_trail_id_results_in_anomaly()
         {
-            StatusScraper sut = CreateStatusScraper("Valid_PR_trails.html");
+            Assert.False(true);
+        }
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
-
-            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal(3, scraperResult.Trails.Count);
-            Assert.Empty(scraperResult.Anomalies);
-
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 01"));
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 200"));
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 02.1"));
+        [Fact]
+        public async Task Valid_trail_with_extra_zero_after_decimal_point_is_corrected()
+        {
+            Assert.False(true);
         }
 
 
         [Fact]
-        public async Task Valid_PR_trail_with_extra_digit_is_corrected()
+        public async Task Bad_trail_URL_creates_anomaly()
         {
-            StatusScraper sut = CreateStatusScraper("Valid_PR_trail_extra_digit.html");
-
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
-
-            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Single(scraperResult.Trails);
-            Assert.Empty(scraperResult.Anomalies);
-
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "PR LP 03.1"));
-        }
-
-
-        [Fact]
-        public async Task Valid_SL_paths_recognised()
-        {
-            StatusScraper sut = CreateStatusScraper("Valid_SL_trails.html");
-
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
-
-            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal(2, scraperResult.Trails.Count);
-            Assert.Empty(scraperResult.Anomalies);
-
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 01"));
-            Assert.True(TrailFound(scraperResult.Trails, "Open", "Link_to_English_version.html", "SL BV 200"));
+            Assert.False(true);
         }
 
         [Fact]
-        public async Task Invalid_paths_recorded_as_anomalies()
+        public async Task Zip_and_PDF_links_creates_anomaly()
         {
-            StatusScraper sut = CreateStatusScraper("Invalid_trails.html");
-
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
-
-            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal(5, scraperResult.Anomalies.Count);
-            Assert.Empty(scraperResult.Trails);
-
-            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PR 130 Etapa 1"));
-            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "GR 120 Etapa 1"));
-            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "GR 130.1"));
-            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PL LP 12"));
-            Assert.True(UnrecognisedTrailAnomaly(scraperResult.Anomalies, "PR LP 1"));
+            Assert.False(true);
         }
 
+        [Fact]
+        public async Task Part_open_status_links_to_status_page()
+        {
+            Assert.False(true);
+        }
 
+        [Fact]
+        public async Task Uncertain_status_creates_anomaly()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task Additinal_link_updates_lookup_table_on_file()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task Timeout_reading_status_page_creates_timeout_result()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task Exception_reading_status_page_creates_exception_result()
+        {
+            Assert.False(true);
+        }
+
+        // links
+
+        [Fact]
+        public async Task English_URL_not_in_map_gets_added()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task English_URL_in_map_gets_returned()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task English_URL_not_found_creates_anomaly()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task Timeout_reading_detail_page_creates_anomaly()
+        {
+            Assert.False(true);
+        }
+
+        [Fact]
+        public async Task Exception_reading_detail_page_creates_anomaly()
+        {
+            Assert.False(true);
+        }
     }
 }
