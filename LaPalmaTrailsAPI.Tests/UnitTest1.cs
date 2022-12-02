@@ -62,9 +62,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
-
             Assert.Empty(scraperResult.Trails);
             Assert.Single(scraperResult.Anomalies);
 
@@ -82,9 +79,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
-
             Assert.Single(scraperResult.Trails);
             Assert.Empty(scraperResult.Anomalies);
 
@@ -103,9 +97,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("0 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
-
             Assert.Single(scraperResult.Trails);
             Assert.Single(scraperResult.Anomalies);
 
@@ -124,9 +115,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("0 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
-
             Assert.Single(scraperResult.Trails);
             Assert.Single(scraperResult.Anomalies);
 
@@ -145,9 +133,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("0 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
-
             Assert.Single(scraperResult.Trails);
             Assert.Single(scraperResult.Anomalies);
 
@@ -166,9 +151,6 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
-            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
-            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
-
             Assert.Single(scraperResult.Trails);
             Assert.Empty(scraperResult.Anomalies);
 
