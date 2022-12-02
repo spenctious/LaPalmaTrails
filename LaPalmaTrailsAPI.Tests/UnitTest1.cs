@@ -94,9 +94,23 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
-        public async Task Bad_trail_URL_creates_anomaly()
+        public async Task Missing_trail_URL_creates_anomaly()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Missing_detail_link.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("0 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Single(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.BadRouteLink.ToString(), anomaly.Type);
+            Assert.Equal("PR LP 01", anomaly.Message);
+            Assert.Equal("No link to route detail", anomaly.Detail);
         }
 
 
