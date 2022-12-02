@@ -75,7 +75,21 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Valid_trail_with_extra_zero_after_decimal_point_is_corrected()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail_extra_digit.html"); // PR LP 03.01
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Single(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            TrailStatus ts = scraperResult.Trails[0];
+            Assert.Equal("PR LP 03.1", ts.Name);
+            Assert.Equal("Open", ts.Status);
+            Assert.Equal("Link_to_English_version.html", ts.Url);
         }
 
 
