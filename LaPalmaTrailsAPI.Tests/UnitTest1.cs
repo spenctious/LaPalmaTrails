@@ -26,7 +26,7 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Empty(scraperResult.Anomalies);
 
             Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
-            Assert.Equal("Trail network probably closed",               scraperResult.Result.Message);
+            Assert.Equal("Trail network probably closed", scraperResult.Result.Message);
             Assert.Equal("Missing table with id tablepress-14", scraperResult.Result.Detail);
         }
 
@@ -34,7 +34,21 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Valid_trail_scraped_creates_trail_and_success_result()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Single(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            TrailStatus ts = scraperResult.Trails[0];
+            Assert.Equal("GR 130 Etapa 1", ts.Name);
+            Assert.Equal("Open", ts.Status);
+            Assert.Equal("Link_to_English_version.html", ts.Url);
         }
 
 
