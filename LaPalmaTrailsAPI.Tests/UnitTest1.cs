@@ -182,7 +182,18 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Uncertain_status_creates_anomaly()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_open_status_unknown.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Single(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.UnreadableStatus.ToString(), anomaly.Type);
+            Assert.Equal("PR LP 01", anomaly.Message);
+            Assert.Equal("Blah blah blah", anomaly.Detail);
         }
 
 
