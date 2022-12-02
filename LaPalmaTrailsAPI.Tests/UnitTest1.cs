@@ -55,7 +55,21 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Invalid_trail_id_results_in_anomaly()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Invalid_trail.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("1 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Empty(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.UnrecognisedTrailId.ToString(), anomaly.Type);
+            Assert.Equal("Unrecognised trail", anomaly.Message);
+            Assert.Equal("PR 130 Etapa 1", anomaly.Detail);
         }
 
         [Fact]
