@@ -33,6 +33,23 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
+        public async Task Missing_status_table_creates_data_error()
+        {
+            StatusScraper sut = CreateStatusScraper("Invalid_Table.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
+            Assert.Empty(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            Assert.Equal(ScraperEvent.EventType.DataError.ToString(),   scraperResult.Result.Type);
+            Assert.Equal("Trail network probably closed",               scraperResult.Result.Message);
+            Assert.Equal("Missing table with id tablepress-14",         scraperResult.Result.Detail);
+        }
+
+
+        [Fact]
         public async Task Valid_GR_paths_recognised()
         {
             StatusScraper sut = CreateStatusScraper("Valid_GR_trails.html");
