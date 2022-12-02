@@ -1,3 +1,5 @@
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 namespace LaPalmaTrailsAPI.Tests
 {
     public class StatusScraperTests
@@ -155,11 +157,27 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal("Dummy.pdf", anomaly.Detail);
         }
 
+
         [Fact]
         public async Task Part_open_status_links_to_status_page()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_partly_open.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Single(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal("PR LP 01", trail.Name);
+            Assert.Equal("Part open", trail.Status);
+            Assert.Equal(sut.StatusPage, trail.Url);
         }
+
 
         [Fact]
         public async Task Uncertain_status_creates_anomaly()
@@ -167,11 +185,13 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.False(true);
         }
 
+
         [Fact]
         public async Task Additinal_link_updates_lookup_table_on_file()
         {
             Assert.False(true);
         }
+
 
         [Fact]
         public async Task Timeout_reading_status_page_creates_timeout_result()
@@ -179,11 +199,13 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.False(true);
         }
 
+
         [Fact]
         public async Task Exception_reading_status_page_creates_exception_result()
         {
             Assert.False(true);
         }
+
 
         // links
 
@@ -193,11 +215,13 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.False(true);
         }
 
+
         [Fact]
         public async Task English_URL_in_map_gets_returned()
         {
             Assert.False(true);
         }
+
 
         [Fact]
         public async Task English_URL_not_found_creates_anomaly()
@@ -205,11 +229,13 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.False(true);
         }
 
+
         [Fact]
         public async Task Timeout_reading_detail_page_creates_anomaly()
         {
             Assert.False(true);
         }
+
 
         [Fact]
         public async Task Exception_reading_detail_page_creates_anomaly()
