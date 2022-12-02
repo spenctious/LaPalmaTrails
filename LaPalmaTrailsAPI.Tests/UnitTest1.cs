@@ -189,7 +189,18 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Timeout_reading_status_page_creates_timeout_result()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedException = new TaskCanceledException("MockWebReader timed out");
+
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
+
+            Assert.Equal(ScraperEvent.EventType.Timeout.ToString(), scraperResult.Result.Type);
+            Assert.Equal("MockWebReader timed out", scraperResult.Result.Message);
+            Assert.Equal(sut.StatusPage, scraperResult.Result.Detail);
+
+            Assert.Empty(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
         }
 
 
