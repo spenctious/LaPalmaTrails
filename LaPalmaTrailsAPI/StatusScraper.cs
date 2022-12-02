@@ -121,21 +121,16 @@ namespace LaPalmaTrailsAPI
                 {
                     // ********** Trail ID: 1st table column
 
-                    // trail ID examples:
-                    // - GR 130 Etapa 1, GR 131 Etapa 2
-                    // - PR LP 01, SL BV 09
-                    // - PR LP 01.1
-                    // - PR LP 02.01 (the leading 0 after the decimal is an error on their part that must be corrected)
                     string trailId = "Unrecognised trail"; // default
                     var trail = row.SelectSingleNode("td[position()=1]").InnerText;
-                    var match = Regex.Match(trail, @"(GR 13(0|1) Etapa \d)|((PR|SL) [A-Z][A-Z] \d{2,3}(\.0\d|\.\d|)?)");
+                    var match = TrailScraperRegex.MatchValidTrailFormats(trail);
 
                     if (match.Success)
                     {
                         trailId = match.ToString();
 
                         // fix the website error where some trails are misnamed with an extra leading zero
-                        if (Regex.IsMatch(trailId, @"\.\d\d$"))
+                        if (TrailScraperRegex.TrailIdHasTwoDigitsAfterDecimal(trailId))
                         {
                             trailId = trailId.Remove(trailId.Length - 2, 1);
                         }
@@ -176,16 +171,11 @@ namespace LaPalmaTrailsAPI
 
                     // ********** Trail status: 3rd table column:
 
-                    // N.B. some entries have additional line breaks that have to be catered for
-                    const string openPattern = "Abierto / Open / Geöffnet";
-                    const string completelyOpenPattern = @"^Abierto / Open / Geöffnet(<br />)?$";
-                    const string closedPattern = "Cerrado / Closed / Gesperrt";
-
                     string trailStatus = "Unknown"; // default
                     var status = row.SelectSingleNode("td[position()=3]").InnerText;
-                    if (Regex.IsMatch(status, openPattern))
+                    if (TrailScraperRegex.TrailIsOpen(status))
                     {
-                        if (Regex.IsMatch(status, completelyOpenPattern))
+                        if (TrailScraperRegex.TrailIsCompletelyOpen(status))
                         {
                             trailStatus = "Open";
                         }
@@ -197,7 +187,7 @@ namespace LaPalmaTrailsAPI
                             trailUrl = StatusPage;
                         }
                     }
-                    else if (Regex.IsMatch(status, closedPattern))
+                    else if (TrailScraperRegex.TrailIsClosed(status))
                     {
                         trailStatus = "Closed";
                     }
