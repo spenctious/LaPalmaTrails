@@ -207,7 +207,18 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Exception_reading_status_page_creates_exception_result()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedException = new Exception("Random error");
+
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
+
+            Assert.Equal(ScraperEvent.EventType.Exception.ToString(), scraperResult.Result.Type);
+            Assert.Equal("Cannot read data", scraperResult.Result.Message);
+            Assert.Equal("Random error", scraperResult.Result.Detail);
+
+            Assert.Empty(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
         }
 
 
