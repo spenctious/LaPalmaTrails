@@ -256,7 +256,6 @@ namespace LaPalmaTrailsAPI
                 try
                 {
                     // get the html page source 
-                    using var httpClient = new HttpClient();
                     webReader.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
                     var html = await webReader.GetStringAsync(spanishUrl);
                     doc.LoadHtml(html);
