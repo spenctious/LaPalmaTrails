@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System;
 using System.Runtime.InteropServices;
 
 namespace LaPalmaTrailsAPI.Tests
@@ -193,7 +194,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
             MockWebReader mockWebReader = new();
-            mockWebReader.SimulatedException = new TaskCanceledException("MockWebReader timed out");
+            mockWebReader.SimulateException.Add("Valid_trail.html", new TaskCanceledException("MockWebReader timed out"));
 
             var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
@@ -211,7 +212,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
             MockWebReader mockWebReader = new();
-            mockWebReader.SimulatedException = new Exception("Random error");
+            mockWebReader.SimulateException.Add("Valid_trail.html", new Exception("Random error"));
 
             var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
@@ -264,14 +265,46 @@ namespace LaPalmaTrailsAPI.Tests
         [Fact]
         public async Task Timeout_reading_detail_page_creates_anomaly()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulateException.Add("Dummy_trail_detail_page.html", new TaskCanceledException("MockWebReader timed out"));
+
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Single(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal(sut.StatusPage, trail.Url);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.Timeout.ToString(), anomaly.Type);
+            Assert.Equal("MockWebReader timed out", anomaly.Message);
+            Assert.Equal("Dummy_trail_detail_page.html", anomaly.Detail);
         }
 
 
         [Fact]
         public async Task Exception_reading_detail_page_creates_anomaly()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulateException.Add("Dummy_trail_detail_page.html", new Exception("MockWebReader exception"));
+
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Single(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal(sut.StatusPage, trail.Url);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.Exception.ToString(), anomaly.Type);
+            Assert.Equal("MockWebReader exception", anomaly.Message);
+            Assert.Equal("Dummy_trail_detail_page.html", anomaly.Detail);
         }
     }
 }
