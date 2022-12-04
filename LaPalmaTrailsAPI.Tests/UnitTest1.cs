@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using System.Runtime.InteropServices;
 
 namespace LaPalmaTrailsAPI.Tests
 {
@@ -239,9 +241,23 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
-        public async Task English_URL_not_found_creates_anomaly()
+        public async Task English_URL_not_found_creates_anomaly_returns_status_page()
         {
-            Assert.False(true);
+            StatusScraper sut = CreateStatusScraper("Valid_trail_bad_link.html");
+
+            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Single(scraperResult.Trails);
+            Assert.Single(scraperResult.Anomalies);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal(sut.StatusPage, trail.Url);
+
+            ScraperEvent anomaly = scraperResult.Anomalies[0];
+            Assert.Equal(ScraperEvent.EventType.BadRouteLink.ToString(), anomaly.Type);
+            Assert.Equal("English URL not found", anomaly.Message);
+            Assert.Equal("Dummy_trail_detail_page_no_English_link.html", anomaly.Detail);
         }
 
 
