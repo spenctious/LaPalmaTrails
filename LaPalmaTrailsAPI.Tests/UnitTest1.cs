@@ -23,8 +23,15 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Invalid_status_table_creates_data_error()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_Table.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Invalid_Table.html",
+                MockWebReader.SimulateWebPage(@"
+                    <table id=""tablepress-13"">
+                    </table>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
             Assert.Empty(scraperResult.Trails);
@@ -40,8 +47,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Valid_trail_scraped_creates_trail_and_success_result()
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">GR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
@@ -61,8 +78,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Invalid_trail_id_results_in_anomaly()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Invalid_trail.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">PR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Empty(scraperResult.Trails);
@@ -78,8 +105,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Valid_trail_with_extra_zero_after_decimal_point_is_corrected()
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail_extra_digit.html"); // PR LP 03.01
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail_extra_digit.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">PR LP 03.01</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -96,8 +133,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Missing_trail_URL_creates_anomaly()
         {
             StatusScraper sut = CreateStatusScraper("Missing_detail_link.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Missing_detail_link.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td>PR LP 01</td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -114,8 +161,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Zip_link_creates_anomaly()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_Zip_link.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Invalid_Zip_link.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy.zip"">PR LP 03</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -132,8 +189,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task PDF_link_creates_anomaly()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_PDF_link.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Invalid_PDF_link.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy.pdf"">PR LP 02</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -150,8 +217,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Part_open_status_links_to_status_page()
         {
             StatusScraper sut = CreateStatusScraper("Valid_partly_open.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_partly_open.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">PR LP 01</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet with additional content</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -168,8 +245,18 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Uncertain_status_creates_anomaly()
         {
             StatusScraper sut = CreateStatusScraper("Valid_open_status_unknown.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_open_status_unknown.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">PR LP 01</a></td>
+                      <td>Whatever</td>
+                      <td>Blah blah blah</td>
+                    </tr>
+                "));
 
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -245,8 +332,22 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task English_URL_not_found_creates_anomaly_returns_status_page()
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail_bad_link.html");
-
-            var scraperResult = await sut.GetTrailStatuses(new MockWebReader());
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail_bad_link.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page_no_English_link.html"">GR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
+            mockWebReader.SimulatedWebPage.Add(
+                "Dummy_trail_detail_page_no_English_link.html",
+                MockWebReader.SimulateWebPage(@"
+                    <link rel=""alternate"" hreflang=""de"" href=""Link_to_German_version.html"" />
+                "));
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Single(scraperResult.Trails);
@@ -267,6 +368,15 @@ namespace LaPalmaTrailsAPI.Tests
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
             MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">GR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
             mockWebReader.SimulateException.Add("Dummy_trail_detail_page.html", new TaskCanceledException("MockWebReader timed out"));
 
             var scraperResult = await sut.GetTrailStatuses(mockWebReader);
@@ -290,6 +400,15 @@ namespace LaPalmaTrailsAPI.Tests
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
             MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">GR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
             mockWebReader.SimulateException.Add("Dummy_trail_detail_page.html", new Exception("MockWebReader exception"));
 
             var scraperResult = await sut.GetTrailStatuses(mockWebReader);
