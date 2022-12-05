@@ -5,8 +5,9 @@ namespace LaPalmaTrailsAPI.Tests
     public class MockWebReader : IWebReader
     {
         TimeSpan _timeout = TimeSpan.FromMilliseconds(1000);
-        private string _simulatedContent = "";
 
+        // allow the calling test to define behaviour by specifying content to be returned
+        // or exception thrown, depending on the page specified
         public Dictionary<string, Exception> SimulateException = new();
         public Dictionary<string, string> SimulatedWebPage = new();
 
@@ -17,6 +18,8 @@ namespace LaPalmaTrailsAPI.Tests
                 "Dummy_trail_detail_page.html", 
                 SimulateWebPage(@"<link rel=""alternate"" hreflang=""en-us"" href=""Link_to_English_version.html"" />"));
         }
+
+        // string building methods to generate simulated web content
 
         public static string SimulateWebPage(string bodyContent)
         {
@@ -52,6 +55,13 @@ namespace LaPalmaTrailsAPI.Tests
                 </table>");
         }
 
+        /// <summary>
+        /// Either returns the simulated web content associated with the test page or throws
+        /// an exception.
+        /// </summary>
+        /// <param name="testPage"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<string> GetStringAsync(string? testPage)
         {
             Exception? exception;
