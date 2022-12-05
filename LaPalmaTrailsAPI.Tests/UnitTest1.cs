@@ -315,16 +315,33 @@ namespace LaPalmaTrailsAPI.Tests
         // links
 
         [Fact]
-        public async Task English_URL_not_in_map_gets_added()
+        public async Task English_URL_not_in_map_gets_added_and_returned()
         {
-            Assert.False(true);
-        }
+            StatusScraper sut = CreateStatusScraper("Valid_trail.html");
+            MockWebReader mockWebReader = new();
+            mockWebReader.SimulatedWebPage.Add(
+                "Valid_trail.html",
+                MockWebReader.SimulateWebPageWithTableId14(@"
+                    <tr>
+                      <td><a href=""Dummy_trail_detail_page.html"">GR 130 Etapa 1</a></td>
+                      <td>Whatever</td>
+                      <td>Abierto / Open / Geöffnet</td>
+                    </tr>
+                "));
+            await sut.GetTrailStatuses(mockWebReader); // called just to clear lookup cache and add entry
+            sut.ClearLookups = false;
 
+            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
 
-        [Fact]
-        public async Task English_URL_in_map_gets_returned()
-        {
-            Assert.False(true);
+            Assert.Single(scraperResult.Trails);
+
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("0 additional page lookups", scraperResult.Result.Message);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal("GR 130 Etapa 1", trail.Name);
+            Assert.Equal("Open", trail.Status);
+            Assert.Equal("Link_to_English_version.html", trail.Url);
         }
 
 
