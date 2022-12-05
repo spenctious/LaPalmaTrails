@@ -270,13 +270,6 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
-        public async Task Additinal_link_updates_lookup_table_on_file()
-        {
-            Assert.False(true);
-        }
-
-
-        [Fact]
         public async Task Timeout_reading_status_page_creates_timeout_result()
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
@@ -442,5 +435,8 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal("MockWebReader exception", anomaly.Message);
             Assert.Equal("Dummy_trail_detail_page.html", anomaly.Detail);
         }
+
+
+        // TO DO: add tests for persistence of lookup table
     }
 }
