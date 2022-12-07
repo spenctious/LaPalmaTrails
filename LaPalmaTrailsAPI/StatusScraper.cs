@@ -217,7 +217,6 @@ namespace LaPalmaTrailsAPI
             // if we already have an English version get it, otherwise try to scrape it
             if (!_urlMap.ContainsKey(spanishUrl))
             {
-                detailLink = _urlMap.GetValue(spanishUrl);
                 var doc = new HtmlDocument();
                 try
                 {
@@ -249,6 +248,10 @@ namespace LaPalmaTrailsAPI
                 {
                     scraperResult.AddAnomaly(ScraperEvent.EventType.Exception, ex.Message, spanishUrl);
                 }
+            }
+            else
+            {
+                detailLink = _urlMap.GetValue(spanishUrl);
             }
 
             return detailLink;
