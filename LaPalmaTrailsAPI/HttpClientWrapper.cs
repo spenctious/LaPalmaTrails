@@ -1,10 +1,10 @@
 ﻿namespace LaPalmaTrailsAPI
 {
-    public class WebReader : IWebReader
+    public class HttpClientWrapper : IHttpClient
     {
         HttpClient httpClient;
 
-        public WebReader()
+        public HttpClientWrapper()
         {
             httpClient = new();
         }

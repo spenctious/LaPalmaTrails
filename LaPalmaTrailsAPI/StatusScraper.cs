@@ -42,7 +42,7 @@ namespace LaPalmaTrailsAPI
         /// Reads trail status information from the official trail website.
         /// </summary>
         /// <returns>A ScraperResult object that records the results of the scraping operation.</returns>
-        public async Task<ScraperResult> GetTrailStatuses(IWebReader webReader)
+        public async Task<ScraperResult> GetTrailStatuses(IHttpClient webReader)
         {
             // clear lookup table if asked to
             if (ClearLookups)
@@ -210,7 +210,7 @@ namespace LaPalmaTrailsAPI
         /// <param name="spanishUrl">The link to scrape for the English version.</param>
         /// <param name="scraperResult">The ScraperResult to which any anomalies found are to be added.</param>
         /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
-        public async Task<string> GetEnglishUrl(IWebReader webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
+        public async Task<string> GetEnglishUrl(IHttpClient webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
         {
             string detailLink = StatusPage;
 

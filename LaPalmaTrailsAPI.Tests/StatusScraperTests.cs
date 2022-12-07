@@ -63,7 +63,7 @@ namespace LaPalmaTrailsAPI.Tests
                 <table id=""tablepress-13"">
                 </table>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent));
 
@@ -90,7 +90,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -122,7 +122,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -150,7 +150,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -179,7 +179,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -208,7 +208,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -237,7 +237,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -266,7 +266,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet with additional content</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -294,7 +294,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Whatever</td>
                     <td>Blah blah blah</td>
                 </tr>                ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
@@ -316,7 +316,7 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Timeout_reading_status_page_creates_timeout_result()
         {
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Throws(new TaskCanceledException("Status page timed out"));
 
@@ -335,7 +335,7 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Exception_reading_status_page_creates_exception_result()
         {
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Throws(new Exception("Random error"));
 
@@ -363,7 +363,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(DetailPageWithValidEnglishLink))
@@ -397,7 +397,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Returns(Task.FromResult(@"<link rel=""alternate"" hreflang=""de"" href=""Link_to_German_version.html"" />"));
@@ -429,7 +429,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Throws(new TaskCanceledException("MockWebReader timed out"));
@@ -461,7 +461,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IWebReader>();
+            var mockHttpClient = new Mock<IHttpClient>();
             mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
                 .Returns(Task.FromResult(pageContent))
                 .Throws(new Exception("MockWebReader exception"));

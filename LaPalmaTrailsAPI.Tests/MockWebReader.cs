@@ -2,7 +2,7 @@
 
 namespace LaPalmaTrailsAPI.Tests
 {
-    public class MockWebReader : IWebReader
+    public class MockWebReader : IHttpClient
     {
         TimeSpan _timeout = TimeSpan.FromMilliseconds(1000);
 
