@@ -8,6 +8,7 @@ namespace LaPalmaTrailsAPI.Tests
 {
     public class StatusScraperTests
     {
+        const string DetailPageWithValidEnglishLink = @"<link rel=""alternate"" hreflang=""en-us"" href=""Link_to_English_version.html"" />";
 
         private StatusScraper CreateStatusScraper(string testPage)
         {
@@ -70,6 +71,8 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Invalid_status_table_creates_data_error()
         {
             StatusScraper sut = CreateStatusScraper("Invalid_Table.html");
+
+
             MockWebReader mockWebReader = CreateMockWebReader();
             string pageContent = SimulateWebPage(@"
                 <table id=""tablepress-13"">
@@ -93,7 +96,7 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Valid_trail_scraped_creates_trail_and_success_result()
         {
             StatusScraper sut = CreateStatusScraper("Valid_trail.html");
-            MockWebReader mockWebReader = CreateMockWebReader();
+            string detailPageContent = DetailPageWithValidEnglishLink;
             string pageContent = SimulateWebPageWithTableId14(@"
                 <tr>
                     <td><a href=""Dummy_trail_detail_page.html"">GR 130 Etapa 1</a></td>
@@ -101,9 +104,12 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Abierto / Open / Geöffnet</td>
                 </tr>
                 ");
-            mockWebReader.SimulatedWebPage.Add("Valid_trail.html", pageContent);
+            var mockHttpClient = new Mock<IWebReader>();
+            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
+                .Returns(Task.FromResult(pageContent))
+                .Returns(Task.FromResult(detailPageContent));
 
-            var scraperResult = await sut.GetTrailStatuses(mockWebReader);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
 
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
             Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
@@ -112,10 +118,10 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Single(scraperResult.Trails);
             Assert.Empty(scraperResult.Anomalies);
 
-            TrailStatus ts = scraperResult.Trails[0];
-            Assert.Equal("GR 130 Etapa 1", ts.Name);
-            Assert.Equal("Open", ts.Status);
-            Assert.Equal("Link_to_English_version.html", ts.Url);
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal("GR 130 Etapa 1", trail.Name);
+            Assert.Equal("Open", trail.Status);
+            Assert.Equal("Link_to_English_version.html", trail.Url);
         }
 
 
