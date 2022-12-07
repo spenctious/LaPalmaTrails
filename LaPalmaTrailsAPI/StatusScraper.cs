@@ -1,8 +1,8 @@
 ﻿using HtmlAgilityPack;
 using System.Text.RegularExpressions;
-using System.Collections.Concurrent;
-using Newtonsoft.Json;
 using System.Reflection.PortableExecutable;
+using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace LaPalmaTrailsAPI
 {
@@ -20,8 +20,7 @@ namespace LaPalmaTrailsAPI
     public class StatusScraper
     {
         // A thread-safe lookup table for converting Spanish URLs to English equivalents
-        private static ConcurrentDictionary<string, string> _urlMap = new();
-        private static readonly object urlLookupTableLock = new();
+        private static PersistentLookupTable _urlMap = new();
 
         /// <summary>
         /// Properties that can be defined by optional API call parameters
@@ -32,45 +31,11 @@ namespace LaPalmaTrailsAPI
         public bool UseCache { get; set; } = true; // set false to guarantee a fresh result
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
 
-        private const string UrlTableLookupFileName = "urlLookupTable.txt";
 
-
-        /// <summary>
-        /// Attempts to restore the URL lookup table from file
-        /// </summary>
-        /// <returns>true if the lookup table was populated from file, false otherwise</returns>
         public static bool LoadUrlLookupTable()
         {
-            lock (urlLookupTableLock)
-            {
-                // no file to load
-                if (!File.Exists(UrlTableLookupFileName)) return false;
-
-                // deserialize from JSON file and check the read worked
-                var dictionary = JsonConvert.DeserializeObject<ConcurrentDictionary<string, string>>
-                    (File.ReadAllText(UrlTableLookupFileName));
-                if (dictionary == null) return false;
-
-                // repopulate the map
-                _urlMap = new ConcurrentDictionary<string, string>(dictionary);
-                return true;
-            }
+            return _urlMap.LoadUrlLookupTable();
         }
-
-
-        /// <summary>
-        /// Save the URL lookup map to file.
-        /// Call whenever additional lookups have had to be made
-        /// </summary>
-        public static void SaveUrlLookupTable()
-        {
-            lock(urlLookupTableLock)
-            {
-                // overwrites file if it already exists or creates it new if it doesn't
-                File.WriteAllText(UrlTableLookupFileName, JsonConvert.SerializeObject(_urlMap));
-            }
-        }
-
 
 
         /// <summary>
@@ -211,7 +176,7 @@ namespace LaPalmaTrailsAPI
                 int additionalLookups = _urlMap.Count - initialUrlMapCount;
                 if (additionalLookups > 0)
                 {
-                    SaveUrlLookupTable();
+                    _urlMap.SaveUrlLookupTable();
                 }
 
                 scraperResult.Success($"{additionalLookups} additional page lookups", $"{scraperResult.Anomalies.Count} anomalies found");
@@ -247,11 +212,12 @@ namespace LaPalmaTrailsAPI
         /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
         public async Task<string> GetEnglishUrl(IWebReader webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
         {
-            string? detailLink; // null by default
+            string detailLink = StatusPage;
 
             // if we already have an English version get it, otherwise try to scrape it
-            if (!_urlMap.TryGetValue(spanishUrl, out detailLink))
+            if (!_urlMap.ContainsKey(spanishUrl))
             {
+                detailLink = _urlMap.GetValue(spanishUrl);
                 var doc = new HtmlDocument();
                 try
                 {
@@ -285,7 +251,7 @@ namespace LaPalmaTrailsAPI
                 }
             }
 
-            return detailLink ?? StatusPage; // Return defaut if detail link not found
+            return detailLink;
         }
 
 
