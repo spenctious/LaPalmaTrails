@@ -387,8 +387,8 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
-                .Throws(new TaskCanceledException("Status page timed out")); // n.b might not be the true wat to do this
-
+                .Returns(Task.FromException<string>(new TaskCanceledException("Status page timed out")));
+            
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
@@ -410,7 +410,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
-                .Throws(new Exception("Random error")); // n.b might not be the true wat to do this
+                .Returns(Task.FromException<string>(new Exception("Random error")));
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
