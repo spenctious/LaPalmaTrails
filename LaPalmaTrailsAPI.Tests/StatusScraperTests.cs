@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Moq;
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using System;
 using System.Runtime.InteropServices;
 
@@ -85,12 +86,11 @@ namespace LaPalmaTrailsAPI.Tests
                 <table id=""tablepress-13"">
                 </table>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(Task.FromResult(pageContent));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
@@ -115,13 +115,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -150,13 +150,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -182,13 +182,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -214,13 +214,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -246,13 +246,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -278,13 +278,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -310,13 +310,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen} with additional content</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -342,12 +342,12 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Blah blah blah</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -366,12 +366,12 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Throws(new TaskCanceledException("Status page timed out"));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>())
+                .Throws(new TaskCanceledException("Status page timed out")); // n.b might not be the true wat to do this
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Timeout.ToString(), scraperResult.Result.Type);
@@ -388,12 +388,12 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Throws(new Exception("Random error"));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>())
+                .Throws(new Exception("Random error")); // n.b might not be the true wat to do this
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Exception.ToString(), scraperResult.Result.Type);
@@ -417,17 +417,17 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink),
+                Task.FromResult(pageContent),
+                Task.FromResult(DetailPageWithValidEnglishLink));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
             sut.ClearLookups = false;
-            scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Single(scraperResult.Trails);
@@ -454,13 +454,13 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(@"<link rel=""alternate"" hreflang=""de"" href=""Link_to_German_version.html"" />"));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(@"<link rel=""alternate"" hreflang=""de"" href=""Link_to_German_version.html"" />"));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -489,13 +489,14 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Throws(new TaskCanceledException("MockWebReader timed out"));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                x => Task.FromResult(pageContent),
+                x => { throw new TaskCanceledException("Detail page timed out"); }
+                );
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -507,7 +508,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             ScraperEvent anomaly = scraperResult.Anomalies[0];
             Assert.Equal(ScraperEvent.EventType.Timeout.ToString(), anomaly.Type);
-            Assert.Equal("MockWebReader timed out", anomaly.Message);
+            Assert.Equal("Detail page timed out", anomaly.Message);
             Assert.Equal(LinkToValidDetailPage, anomaly.Detail);
         }
 
@@ -524,13 +525,14 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Throws(new Exception("MockWebReader exception"));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                x => Task.FromResult(pageContent),
+                x => { throw new Exception("Detail page errored"); }
+                );
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -542,7 +544,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             ScraperEvent anomaly = scraperResult.Anomalies[0];
             Assert.Equal(ScraperEvent.EventType.Exception.ToString(), anomaly.Type);
-            Assert.Equal("MockWebReader exception", anomaly.Message);
+            Assert.Equal("Detail page errored", anomaly.Message);
             Assert.Equal(LinkToValidDetailPage, anomaly.Detail);
         }
 
@@ -560,16 +562,14 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = File.ReadAllText(TestFile);
 
             StatusScraper sut = CreateStatusScraper(TestFile);
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient
-                .Setup(x => x.GetStringAsync(It.IsAny<string>())) // other than the status page, all pages scraped should be detail pages
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
-            mockHttpClient
-                .Setup(x => x.GetStringAsync(It.Is<string>(p => p == TestFile)))
-                .Returns(Task.FromResult(pageContent));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(DetailPageWithValidEnglishLink));
+            mockHttpClient.GetStringAsync(Arg.Is<string>(p => p == TestFile)).Returns(
+                Task.FromResult(pageContent));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
@@ -589,16 +589,14 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = File.ReadAllText(TestFile);
 
             StatusScraper sut = CreateStatusScraper(TestFile);
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient
-                .Setup(x => x.GetStringAsync(It.IsAny<string>())) // other than the status page, all pages scraped should be detail pages
-                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
-            mockHttpClient
-                .Setup(x => x.GetStringAsync(It.Is<string>(p => p == TestFile)))
-                .Returns(Task.FromResult(pageContent));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(DetailPageWithValidEnglishLink));
+            mockHttpClient.GetStringAsync(Arg.Is<string>(p => p == TestFile)).Returns(
+                Task.FromResult(pageContent));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
@@ -626,13 +624,13 @@ namespace LaPalmaTrailsAPI.Tests
                 ");
 
             StatusScraper sut = CreateStatusScraper(TestFile);
-            var mockHttpClient = new Mock<IHttpClient>();
-            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
-                .Returns(Task.FromResult(pageContent))
-                .Returns(Task.FromResult(detailPageContent));
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(detailPageContent));
 
             // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
