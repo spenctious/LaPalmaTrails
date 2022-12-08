@@ -82,10 +82,12 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPage(@"
                 <table id=""tablepress-13"">
                 </table>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(Task.FromResult(pageContent));
 
@@ -108,6 +110,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
@@ -115,6 +118,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -143,6 +147,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>PR 130 Etapa 1</a></td>
@@ -150,6 +155,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -175,6 +181,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>PR LP 03.01</a></td>
@@ -182,6 +189,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -207,6 +215,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td>PR LP 01</td>
@@ -214,6 +223,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -239,6 +249,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href=""Dummy.zip"">PR LP 03</a></td>
@@ -246,6 +257,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -271,6 +283,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href=""Dummy.pdf"">PR LP 02</a></td>
@@ -278,6 +291,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -303,6 +317,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>PR LP 01</a></td>
@@ -310,6 +325,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen} with additional content</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -335,6 +351,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>PR LP 01</a></td>
@@ -342,6 +359,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>Blah blah blah</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -366,6 +384,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
                 .Throws(new TaskCanceledException("Status page timed out")); // n.b might not be the true wat to do this
@@ -388,6 +407,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
                 .Throws(new Exception("Random error")); // n.b might not be the true wat to do this
@@ -410,6 +430,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
@@ -417,6 +438,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -447,6 +469,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href=""Detail_page_no_English_link.html"">GR 130 Etapa 1</a></td>
@@ -454,6 +477,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -482,6 +506,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
@@ -489,6 +514,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 x => Task.FromResult(pageContent),
@@ -518,6 +544,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arange
             StatusScraper sut = CreateStatusScraper(StatusPageUrl);
+
             string pageContent = SimulateWebPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
@@ -525,6 +552,7 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 x => Task.FromResult(pageContent),
@@ -562,6 +590,7 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = File.ReadAllText(TestFile);
 
             StatusScraper sut = CreateStatusScraper(TestFile);
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(DetailPageWithValidEnglishLink));
@@ -589,6 +618,7 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = File.ReadAllText(TestFile);
 
             StatusScraper sut = CreateStatusScraper(TestFile);
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(DetailPageWithValidEnglishLink));
@@ -624,6 +654,7 @@ namespace LaPalmaTrailsAPI.Tests
                 ");
 
             StatusScraper sut = CreateStatusScraper(TestFile);
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
