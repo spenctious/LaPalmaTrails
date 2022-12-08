@@ -71,6 +71,7 @@ namespace LaPalmaTrailsAPI.Tests
                 </table>");
         }
 
+
         //
         // Tests
         //
@@ -543,6 +544,108 @@ namespace LaPalmaTrailsAPI.Tests
             Assert.Equal(ScraperEvent.EventType.Exception.ToString(), anomaly.Type);
             Assert.Equal("MockWebReader exception", anomaly.Message);
             Assert.Equal(LinkToValidDetailPage, anomaly.Detail);
+        }
+
+
+        //
+        // Live snapshot tests - prove validity of test data by showing expected behaviour with real data
+        //
+
+
+        [Fact]
+        public async Task Live_snapshot_network_open_is_scraped_successfully()
+        {
+            // Arrange
+            const string TestFile = @"Test Data\LiveSnapshotOpen.htm";
+            string pageContent = File.ReadAllText(TestFile);
+
+            StatusScraper sut = CreateStatusScraper(TestFile);
+            var mockHttpClient = new Mock<IHttpClient>();
+            mockHttpClient
+                .Setup(x => x.GetStringAsync(It.IsAny<string>())) // other than the status page, all pages scraped should be detail pages
+                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            mockHttpClient
+                .Setup(x => x.GetStringAsync(It.Is<string>(p => p == TestFile)))
+                .Returns(Task.FromResult(pageContent));
+
+            // Act
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+
+            // Assert
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("73 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("8 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Equal(80, scraperResult.Trails.Count);
+            Assert.Equal(8, scraperResult.Anomalies.Count);
+        }
+
+
+        [Fact]
+        public async Task Live_snapsot_network_closed_scrapes_successfully()
+        {
+            // Arrange
+            const string TestFile = @"Test Data\LiveSnapshotClosed.htm";
+            string pageContent = File.ReadAllText(TestFile);
+
+            StatusScraper sut = CreateStatusScraper(TestFile);
+            var mockHttpClient = new Mock<IHttpClient>();
+            mockHttpClient
+                .Setup(x => x.GetStringAsync(It.IsAny<string>())) // other than the status page, all pages scraped should be detail pages
+                .Returns(Task.FromResult(DetailPageWithValidEnglishLink));
+            mockHttpClient
+                .Setup(x => x.GetStringAsync(It.Is<string>(p => p == TestFile)))
+                .Returns(Task.FromResult(pageContent));
+
+            // Act
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+
+            // Assert
+            Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
+            Assert.Empty(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            Assert.Equal(ScraperEvent.EventType.DataError.ToString(), scraperResult.Result.Type);
+            Assert.Equal("Trail network probably closed", scraperResult.Result.Message);
+            Assert.Equal("Missing table with id tablepress-14", scraperResult.Result.Detail);
+        }
+
+
+        [Fact]
+        public async Task Live_snapshot_detail_page_scraped_successfully()
+        {
+            // Arrange
+            const string TestFile = @"Test Data\LiveSnapshotDetail.htm";
+            string detailPageContent = File.ReadAllText(TestFile);
+            string pageContent = SimulateWebPageWithValidTable($@"
+                <tr>
+                    <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
+                    <td>{IgnoredContent}</td>
+                    <td>{TrailOpen}</td>
+                </tr>
+                ");
+
+            StatusScraper sut = CreateStatusScraper(TestFile);
+            var mockHttpClient = new Mock<IHttpClient>();
+            mockHttpClient.SetupSequence(x => x.GetStringAsync(It.IsAny<String>()))
+                .Returns(Task.FromResult(pageContent))
+                .Returns(Task.FromResult(detailPageContent));
+
+            // Act
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient.Object);
+
+            // Assert
+            Assert.Equal(ScraperEvent.EventType.Success.ToString(), scraperResult.Result.Type);
+            Assert.Equal("1 additional page lookups", scraperResult.Result.Message);
+            Assert.Equal("0 anomalies found", scraperResult.Result.Detail);
+
+            Assert.Single(scraperResult.Trails);
+            Assert.Empty(scraperResult.Anomalies);
+
+            TrailStatus trail = scraperResult.Trails[0];
+            Assert.Equal("GR 130 Etapa 1", trail.Name);
+            Assert.Equal("Open", trail.Status);
+            Assert.Equal(@"https://www.senderosdelapalma.es/en/footpaths/list-of-footpaths/long-distance-footpaths/gr-130-stage-1/", trail.Url);
         }
     }
 }
