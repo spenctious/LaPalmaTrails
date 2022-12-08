@@ -26,4 +26,16 @@
     <ProjectReference Include="..\LaPalmaTrailsAPI\LaPalmaTrailsAPI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Test Data\LiveSnapshotClosed.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Test Data\LiveSnapshotDetail.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Test Data\LiveSnapshotOpen.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
