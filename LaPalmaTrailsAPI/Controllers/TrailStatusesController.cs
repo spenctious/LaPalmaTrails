@@ -8,6 +8,12 @@ namespace LaPalmaTrailsAPI.Controllers
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class TrailStatusesController : ControllerBase
     {
+        private readonly IHttpClient _httpClient;
+        public TrailStatusesController(IHttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get(
             // optional parameters - mainly used for testing
@@ -28,7 +34,7 @@ namespace LaPalmaTrailsAPI.Controllers
                 if (useCache != null)           { statusScraper.UseCache            = (bool)useCache; }
                 if (clearLookups != null)       { statusScraper.ClearLookups        = (bool)clearLookups; }
 
-                var scraperResult = await statusScraper.GetTrailStatuses(new HttpClientWrapper());
+                var scraperResult = await statusScraper.GetTrailStatuses(_httpClient);
                 return Ok(scraperResult);
             }
             catch (Exception e)

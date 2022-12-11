@@ -1,4 +1,5 @@
 using LaPalmaTrailsAPI;
+using System.Net.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,7 @@ builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IHttpClient, HttpClientWrapper>();
 
 var app = builder.Build();
 
