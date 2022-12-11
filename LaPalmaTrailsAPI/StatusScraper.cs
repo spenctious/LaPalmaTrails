@@ -38,6 +38,89 @@ namespace LaPalmaTrailsAPI
         }
 
 
+        private string GetTrailId(HtmlNode row, ScraperResult scraperResult)
+        {
+            string trailId = "Unrecognised trail"; // default
+
+            var trail = row.SelectSingleNode("td[position()=1]").InnerText;
+            var match = TrailScraperRegex.MatchValidTrailFormats(trail);
+
+            if (match.Success)
+            {
+                trailId = match.ToString();
+
+                // fix the website error where some trails are misnamed with an extra leading zero
+                if (TrailScraperRegex.TrailIdHasTwoDigitsAfterDecimal(trailId))
+                {
+                    trailId = trailId.Remove(trailId.Length - 2, 1);
+                }
+            }
+            else
+            {
+                // trail does not match any recognised trail pattern
+                scraperResult.AddAnomaly(ScraperEvent.EventType.UnrecognisedTrailId, trailId, trail.Trim());
+            }
+
+            return trailId;
+        }
+
+
+        private string GetSpanishDetailLink(HtmlNode row, string trailId, ScraperResult scraperResult)
+        {
+            var link = row.SelectSingleNode("td[position()=1]//a[@href]");
+            string scrapedUrl = link == null ? "failed" : link.GetAttributeValue("href", "failed");
+
+            if (scrapedUrl == "failed")
+            {
+                // the trail ID column doesn't appear to have a valid link
+                scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, "No link to route detail");
+                scrapedUrl = StatusPage;
+            }
+            else
+            {
+                // we don't want to link to large PDFs or inappropriate GPX files in ZIP format
+                // so skip and use the default
+                if (scrapedUrl.EndsWith(".pdf") || scrapedUrl.EndsWith(".zip"))
+                {
+                    scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, scrapedUrl);
+                    scrapedUrl = StatusPage;
+                }
+            }
+
+            return scrapedUrl;
+        }
+
+
+        private string GetTrailStatus(HtmlNode row, string trailId, ScraperResult scraperResult)
+        {
+            string trailStatus = "Unknown"; // default
+
+            var status = row.SelectSingleNode("td[position()=3]").InnerText;
+            if (TrailScraperRegex.TrailIsOpen(status))
+            {
+                if (TrailScraperRegex.TrailIsCompletelyOpen(status))
+                {
+                    trailStatus = "Open";
+                }
+                else
+                {
+                    trailStatus = "Part open";
+                }
+            }
+            else if (TrailScraperRegex.TrailIsClosed(status))
+            {
+                trailStatus = "Closed";
+            }
+            else
+            {
+                // trail status isn't clearly marked as open or closed
+                scraperResult.AddAnomaly(ScraperEvent.EventType.UnreadableStatus, trailId, status);
+            }
+
+            return trailStatus;
+        }
+
+
         /// <summary>
         /// Reads trail status information from the official trail website.
         /// </summary>
@@ -63,7 +146,6 @@ namespace LaPalmaTrailsAPI
             var doc = new HtmlDocument();
             try
             {
-                //using var httpClient = new HttpClient();
                 webReader.Timeout = TimeSpan.FromMilliseconds(StatusPageTimeout);
                 var html = await webReader.GetStringAsync(StatusPage);
                 doc.LoadHtml(html);
@@ -84,86 +166,26 @@ namespace LaPalmaTrailsAPI
 
                 foreach (HtmlNode row in nodes)
                 {
-                    // ********** Trail ID: 1st table column
+                    // get trail id
+                    string trailId = GetTrailId(row, scraperResult);
 
-                    string trailId = "Unrecognised trail"; // default
-                    var trail = row.SelectSingleNode("td[position()=1]").InnerText;
-                    var match = TrailScraperRegex.MatchValidTrailFormats(trail);
-
-                    if (match.Success)
+                    // get detail page link
+                    string detailPageInSpanish = GetSpanishDetailLink(row, trailId, scraperResult);
+                    string trailUrl = StatusPage;
+                    if (detailPageInSpanish != StatusPage)
                     {
-                        trailId = match.ToString();
-
-                        // fix the website error where some trails are misnamed with an extra leading zero
-                        if (TrailScraperRegex.TrailIdHasTwoDigitsAfterDecimal(trailId))
-                        {
-                            trailId = trailId.Remove(trailId.Length - 2, 1);
-                        }
-                    }
-                    else
-                    {
-                        // trail does not match any recognised trail pattern
-                        scraperResult.AddAnomaly(ScraperEvent.EventType.UnrecognisedTrailId, trailId, trail.Trim());
+                        trailUrl = await GetEnglishUrl(webReader, trailId, detailPageInSpanish, scraperResult);
                     }
 
-                    // ********** Trail URL: 1st table column
-
-                    // get the Spanish trail url
-                    // if successful overwrite with the English version or best alternative
-                    string trailUrl = StatusPage; // default
-                    var link = row.SelectSingleNode("td[position()=1]//a[@href]");
-                    string scrapedUrl = link == null ? "failed" : link.GetAttributeValue("href", "failed");
-
-                    if (scrapedUrl == "failed")
-                    {
-                        // the trail ID column doesn't appear to have a valid link
-                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, "No link to route detail");
-                    }
-                    else
-                    {
-                        // we don't want to link to large PDFs or inappropriate GPX files in ZIP format
-                        // so skip and use the default
-                        if (scrapedUrl.EndsWith(".pdf") || scrapedUrl.EndsWith(".zip"))
-                        {
-                            scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, scrapedUrl);
-                        }
-                        else
-                        {
-                            trailUrl = await GetEnglishUrl(webReader, trailId, scrapedUrl, scraperResult);
-                        }
-                    }
-
-
-                    // ********** Trail status: 3rd table column:
-
-                    string trailStatus = "Unknown"; // default
+                    // get status
+                    string trailStatus = GetTrailStatus(row, trailId, scraperResult);
                     var status = row.SelectSingleNode("td[position()=3]").InnerText;
-                    if (TrailScraperRegex.TrailIsOpen(status))
-                    {
-                        if (TrailScraperRegex.TrailIsCompletelyOpen(status))
-                        {
-                            trailStatus = "Open";
-                        }
-                        else
-                        {
-                            trailStatus = "Part open";
-
-                            // link to the status page as this is where further details can be found
-                            trailUrl = StatusPage;
-                        }
-                    }
-                    else if (TrailScraperRegex.TrailIsClosed(status))
-                    {
-                        trailStatus = "Closed";
-                    }
-                    else
-                    {
-                        // trail status isn't clearly marked as open or closed
-                        scraperResult.AddAnomaly(ScraperEvent.EventType.UnreadableStatus, trailId, status);
+                    if (trailStatus == "Part open")
+                    { 
+                        trailUrl = StatusPage; // link to the status page as this is where further details can be found
                     }
 
-
-                    // only add valid trails
+                    // add valid trails to trail list
                     if (trailId != "Unrecognised trail")
                     {
                         scraperResult.AddTrailStatus(trailId, trailStatus, trailUrl);
