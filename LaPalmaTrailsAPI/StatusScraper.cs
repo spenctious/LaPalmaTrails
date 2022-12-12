@@ -17,7 +17,7 @@ namespace LaPalmaTrailsAPI
     /// 
     /// Successful scraping results are cached and refreshed if over a day old.
     /// </summary>
-    public class StatusScraper
+    public class StatusScraper : IStatusScraper
     {
         // A thread-safe lookup table for converting Spanish URLs to English equivalents
         private static PersistentLookupTable _urlMap = new();
@@ -181,7 +181,7 @@ namespace LaPalmaTrailsAPI
                     string trailStatus = GetTrailStatus(row, trailId, scraperResult);
                     var status = row.SelectSingleNode("td[position()=3]").InnerText;
                     if (trailStatus == "Part open")
-                    { 
+                    {
                         trailUrl = StatusPage; // link to the status page as this is where further details can be found
                     }
 

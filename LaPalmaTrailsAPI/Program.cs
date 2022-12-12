@@ -8,6 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IHttpClient, HttpClientWrapper>();
+builder.Services.AddScoped<IStatusScraper, StatusScraper>();
 
 var app = builder.Build();
 

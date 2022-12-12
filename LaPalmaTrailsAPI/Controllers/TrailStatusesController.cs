@@ -9,9 +9,11 @@ namespace LaPalmaTrailsAPI.Controllers
     public class TrailStatusesController : ControllerBase
     {
         private readonly IHttpClient _httpClient;
-        public TrailStatusesController(IHttpClient httpClient)
+        private readonly IStatusScraper _statusScraper;
+        public TrailStatusesController(IHttpClient httpClient, IStatusScraper statusScraper)
         {
             _httpClient = httpClient;
+            _statusScraper = statusScraper;
         }
 
         [HttpGet]
@@ -25,16 +27,14 @@ namespace LaPalmaTrailsAPI.Controllers
         {
             try
             {
-                StatusScraper statusScraper = new();
-
                 // override defaults with parameter values if set
-                if (statusPage != null)         { statusScraper.StatusPage          = statusPage; }
-                if (statusPageTimeout != null)  { statusScraper.StatusPageTimeout   = (int)statusPageTimeout; }
-                if (detailPageTimeout != null)  { statusScraper.DetailPageTimeout   = (int)detailPageTimeout; }
-                if (useCache != null)           { statusScraper.UseCache            = (bool)useCache; }
-                if (clearLookups != null)       { statusScraper.ClearLookups        = (bool)clearLookups; }
+                if (statusPage != null)         { _statusScraper.StatusPage          = statusPage; }
+                if (statusPageTimeout != null)  { _statusScraper.StatusPageTimeout   = (int)statusPageTimeout; }
+                if (detailPageTimeout != null)  { _statusScraper.DetailPageTimeout   = (int)detailPageTimeout; }
+                if (useCache != null)           { _statusScraper.UseCache            = (bool)useCache; }
+                if (clearLookups != null)       { _statusScraper.ClearLookups        = (bool)clearLookups; }
 
-                var scraperResult = await statusScraper.GetTrailStatuses(_httpClient);
+                var scraperResult = await _statusScraper.GetTrailStatuses(_httpClient);
                 return Ok(scraperResult);
             }
             catch (Exception e)
