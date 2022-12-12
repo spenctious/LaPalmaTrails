@@ -1,18 +1,8 @@
 ﻿using FluentAssertions.Execution;
 using FluentAssertions;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LaPalmaTrailsAPI.Controllers;
-using Json.Net;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using NSubstitute.ExceptionExtensions;
-using NSubstitute.Core;
-using Microsoft.AspNetCore.Http;
 
 namespace LaPalmaTrailsAPI.Tests
 {
