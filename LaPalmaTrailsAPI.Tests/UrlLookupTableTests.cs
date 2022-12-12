@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace LaPalmaTrailsAPI.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class UrlLookupTableTests
     {
-
         private void DeleteLookupTableFile()
         {
             if (File.Exists(PersistentLookupTable.UrlTableLookupFileName))

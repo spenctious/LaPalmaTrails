@@ -3,9 +3,11 @@ using FluentAssertions;
 using NSubstitute;
 using LaPalmaTrailsAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LaPalmaTrailsAPI.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class ControllerTests
     {
         [Fact]

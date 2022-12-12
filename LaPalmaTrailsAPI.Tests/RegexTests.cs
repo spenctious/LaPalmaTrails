@@ -1,5 +1,8 @@
-﻿namespace LaPalmaTrailsAPI.Tests
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace LaPalmaTrailsAPI.Tests
 {
+    [ExcludeFromCodeCoverage]
     public class RegexTests
     {
         [InlineData("GR 130 Etapa 1")]
