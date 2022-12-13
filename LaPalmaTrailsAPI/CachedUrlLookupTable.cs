@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 
 namespace LaPalmaTrailsAPI
 {
+    /// <summary>
+    /// A standard concurrent dictionary as a singleton with file persistance
+    /// </summary>
     public sealed class CachedUrlLookupTable
     {
         private ConcurrentDictionary<string, string> _urlMap = new();
