@@ -78,5 +78,21 @@ namespace LaPalmaTrailsAPI.Tests
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
+
+        public static void DeleteLookupTableFile()
+        {
+            if (File.Exists(CachedUrlLookupTable.UrlTableLookupFileName))
+            {
+                File.Delete(CachedUrlLookupTable.UrlTableLookupFileName);
+            }
+        }
+
+        public static void CreateLookupTableFile(string contents)
+        {
+            File.WriteAllText(CachedUrlLookupTable.UrlTableLookupFileName, contents);
+        }
+
+
+
     }
 }
