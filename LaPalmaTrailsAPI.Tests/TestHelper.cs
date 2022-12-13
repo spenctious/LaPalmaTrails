@@ -23,24 +23,19 @@ namespace LaPalmaTrailsAPI.Tests
         public const string TrailOpen = "Abierto / Open / Geöffnet";
 
 
-        //
-        // Helper setup methods
-        //
-
-
         // Factory method to create status scraper objects in a 'clean' and reproducable state
-        public static StatusScraper CreateStatusScraper(string testPage)
+        public static StatusScraper CreateStatusScraper(string testPage = StatusPageUrl, bool clearLookups = true, bool useCache = false)
         {
             StatusScraper scraper = new();
             scraper.StatusPage = testPage;
-            scraper.ClearLookups = true;
-            scraper.UseCache = false;
+            scraper.ClearLookups = clearLookups;
+            scraper.UseCache = useCache;
 
             return scraper;
         }
 
         // Minimal valid web page content creator
-        public static string SimulateWebPage(string bodyContent)
+        public static string StatusPage(string bodyContent)
         {
             return $@"
                 <!DOCTYPE html>
@@ -58,9 +53,9 @@ namespace LaPalmaTrailsAPI.Tests
         }
 
         // Creates a web page with table of correct id to scrape
-        public static string SimulateWebPageWithValidTable(string tableContent)
+        public static string StatusPageWithValidTable(string tableContent)
         {
-            return SimulateWebPage($@"
+            return StatusPage($@"
                 <table id=""tablepress-14"">
                   <thead>
                     <tr>
@@ -75,5 +70,13 @@ namespace LaPalmaTrailsAPI.Tests
                 </table>");
         }
 
+        // Creates a web page with a valid table with a single row containing a valid open trail
+        public static string StatusPageWithWithSingleValidOpenTrail = StatusPageWithValidTable($@"
+                <tr>
+                    <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
+                    <td>{IgnoredContent}</td>
+                    <td>{TrailOpen}</td>
+                </tr>
+                ");
     }
 }

@@ -4,6 +4,7 @@ using NSubstitute;
 using LaPalmaTrailsAPI.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LaPalmaTrailsAPI.Tests
 {
@@ -14,7 +15,7 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Successful_scrape_returns_trails_anomalies_success_200()
         {
             // Arrange
-            string pageContent = TestHelper.SimulateWebPageWithValidTable($@"
+            string pageContent = TestHelper.StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
                     <td>{TestHelper.IgnoredContent}</td>
@@ -63,34 +64,38 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Successful_scrape_with_parameters_returns_trails_anomalies_success_200()
         {
             // Arrange
-            string pageContent = TestHelper.SimulateWebPageWithValidTable($@"
-                <tr>
-                    <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>{TestHelper.IgnoredContent}</td>
-                    <td>{TestHelper.TrailOpen}</td>
-                </tr>
-                ");
-
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(pageContent),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             var mockStatusScraper = Substitute.For<IStatusScraper>();
             mockStatusScraper.GetTrailStatuses(mockHttpClient)
                 .Returns(new ScraperResult());
 
+            string nonDefaultUrl        = "https://different.co.uk";
+            int nonDefaultStatusTimeout = 999;
+            int nonDefaultDetailTimeout = 111;
+            bool nonDefaultUseCache     = false;
+            bool nonDefaultClearLookups = true;
+
+
             var sut = new TrailStatusesController(mockHttpClient, mockStatusScraper);
 
             // Act
-            var actionResult = await sut.Get("foo", 999, 111, false, false);
+            var actionResult = await sut.Get(
+                nonDefaultUrl,
+                nonDefaultStatusTimeout,
+                nonDefaultDetailTimeout,
+                nonDefaultUseCache,
+                nonDefaultClearLookups);
 
             // Assert
-            mockStatusScraper.StatusPage.Should().Be("foo");
-            mockStatusScraper.StatusPageTimeout.Should().Be(999);
-            mockStatusScraper.DetailPageTimeout.Should().Be(111);
-            mockStatusScraper.UseCache.Should().Be(false);
-            mockStatusScraper.ClearLookups.Should().Be(false);
+            mockStatusScraper.StatusPage.Should().Be(nonDefaultUrl);
+            mockStatusScraper.StatusPageTimeout.Should().Be(nonDefaultStatusTimeout);
+            mockStatusScraper.DetailPageTimeout.Should().Be(nonDefaultDetailTimeout);
+            mockStatusScraper.UseCache.Should().Be(nonDefaultUseCache);
+            mockStatusScraper.ClearLookups.Should().Be(nonDefaultClearLookups);
 
             var okResult = actionResult as OkObjectResult;
             okResult.Should().NotBeNull();
@@ -102,7 +107,7 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Failed_scrape_returns_error_message_server_error_500()
         {
             // Arrange
-            string pageContent = TestHelper.SimulateWebPageWithValidTable($@"
+            string pageContent = TestHelper.StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
                     <td>{TestHelper.IgnoredContent}</td>
