@@ -20,7 +20,7 @@ namespace LaPalmaTrailsAPI
     public class StatusScraper : IStatusScraper
     {
         // A thread-safe lookup table for converting Spanish URLs to English equivalents
-        private static PersistentLookupTable _urlMap = new();
+        //private static PersistentLookupTable _urlMap = new();
 
         /// <summary>
         /// Properties that can be defined by optional API call parameters
@@ -30,12 +30,6 @@ namespace LaPalmaTrailsAPI
         public int DetailPageTimeout { get; set; } = 5000; // ms
         public bool UseCache { get; set; } = true; // set false to guarantee a fresh result
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
-
-
-        public static bool LoadUrlLookupTable()
-        {
-            return _urlMap.LoadUrlLookupTable();
-        }
 
 
         private string GetTrailId(HtmlNode row, ScraperResult scraperResult)
@@ -130,9 +124,9 @@ namespace LaPalmaTrailsAPI
             // clear lookup table if asked to
             if (ClearLookups)
             {
-                _urlMap.Clear();
+                CachedUrlLookupTable.Instance.Value.Clear();
             }
-            int initialUrlMapCount = _urlMap.Count;
+            int initialUrlMapCount = CachedUrlLookupTable.Instance.Value.Count;
 
             // use the cached result if it's still valid
             if (LastResultIsStillValid)
@@ -195,10 +189,10 @@ namespace LaPalmaTrailsAPI
                 // ********** Status page successfully scraped
 
                 // if we found additional links, update the file version of the lookup table
-                int additionalLookups = _urlMap.Count - initialUrlMapCount;
+                int additionalLookups = CachedUrlLookupTable.Instance.Value.Count - initialUrlMapCount;
                 if (additionalLookups > 0)
                 {
-                    _urlMap.SaveUrlLookupTable();
+                    CachedUrlLookupTable.Instance.SaveToFile();
                 }
 
                 scraperResult.Success($"{additionalLookups} additional page lookups", $"{scraperResult.Anomalies.Count} anomalies found");
@@ -234,15 +228,13 @@ namespace LaPalmaTrailsAPI
         /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
         public async Task<string> GetEnglishUrl(IHttpClient webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
         {
-            string detailLink = StatusPage;
+            string detailLink;
 
             // if we already have an English version get it, otherwise try to scrape it
-            if (_urlMap.ContainsKey(spanishUrl))
+            if (!CachedUrlLookupTable.Instance.Value.TryGetValue(spanishUrl, out detailLink))
             {
-                detailLink = _urlMap.GetValue(spanishUrl);
-            }
-            else
-            {
+                detailLink = StatusPage; // set default
+
                 var doc = new HtmlDocument();
                 try
                 {
@@ -261,7 +253,7 @@ namespace LaPalmaTrailsAPI
                     }
                     else
                     {
-                        _urlMap.TryAdd(spanishUrl, englishUrl); // ignore result - if key is already there then the value should be the same
+                        CachedUrlLookupTable.Instance.Value.TryAdd(spanishUrl, englishUrl); // ignore result - if key is already there then the value should be the same
                         detailLink = englishUrl;
                     }
                 }

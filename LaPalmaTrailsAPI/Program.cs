@@ -46,7 +46,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // try to populate the URL lookup table from file but if that fails build it from an initial scrape
-if (!StatusScraper.LoadUrlLookupTable())
+if (!CachedUrlLookupTable.Instance.LoadFromFile())
 {
     StatusScraper statusScraper = new();
     await statusScraper.GetTrailStatuses(new HttpClientWrapper());
