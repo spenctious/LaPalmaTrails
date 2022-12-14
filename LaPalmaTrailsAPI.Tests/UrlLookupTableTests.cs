@@ -58,10 +58,25 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
-        public void Exisitng_empty_file_is_loaded_returns_false()
+        public void Exisitng_file_with_empty_content_is_loaded_returns_false()
         {
             // Arrange
             TestHelper.CreateLookupTableFile(@"{ }"); // no data
+
+            // Act
+            bool loaded = CachedUrlLookupTable.Instance.LoadFromFile();
+
+            // Assert
+            loaded.Should().Be(false);
+            CachedUrlLookupTable.Instance.Value.Count.Should().Be(0);
+        }
+
+
+        [Fact]
+        public void Exisitng_empty_file_is_loaded_returns_false()
+        {
+            // Arrange
+            TestHelper.CreateLookupTableFile(@""); // no data
 
             // Act
             bool loaded = CachedUrlLookupTable.Instance.LoadFromFile();
