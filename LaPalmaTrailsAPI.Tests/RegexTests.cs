@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using FluentAssertions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LaPalmaTrailsAPI.Tests
 {
@@ -18,8 +19,8 @@ namespace LaPalmaTrailsAPI.Tests
         {
             var match = TrailScraperRegex.MatchValidTrailFormats(trailId);
 
-            Assert.True(match.Success);
-            Assert.Equal(trailId, match.ToString());
+            match.Success.Should().BeTrue();
+            trailId.Should().Be(match.ToString());
         }
 
 
@@ -33,7 +34,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             var match = TrailScraperRegex.MatchValidTrailFormats(trailId);
 
-            Assert.False(match.Success);
+            match.Success.Should().BeFalse();
         }
 
 
@@ -42,7 +43,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isOpen = TrailScraperRegex.TrailIsOpen("Abierto / Open / Geöffnet");
 
-            Assert.True(isOpen);
+            isOpen.Should().BeTrue();
         }
 
 
@@ -54,7 +55,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isOpen = TrailScraperRegex.TrailIsOpen(status);
 
-            Assert.False(isOpen);
+            isOpen.Should().BeFalse();
         }
 
 
@@ -65,7 +66,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isCompletelyOpen = TrailScraperRegex.TrailIsCompletelyOpen(status);
 
-            Assert.True(isCompletelyOpen);
+            isCompletelyOpen.Should().BeTrue();
         }
 
 
@@ -77,7 +78,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isOpen = TrailScraperRegex.TrailIsCompletelyOpen(status);
 
-            Assert.False(isOpen);
+            isOpen.Should().BeFalse();
         }
 
 
@@ -86,7 +87,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isClosed = TrailScraperRegex.TrailIsClosed("Cerrado / Closed / Gesperrt");
 
-            Assert.True(isClosed);
+            isClosed.Should().BeTrue();
         }
 
 
@@ -97,7 +98,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool isClosed = TrailScraperRegex.TrailIsClosed(status);
 
-            Assert.False(isClosed);
+            isClosed.Should().BeFalse();
         }
 
         [Fact]
@@ -105,7 +106,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool hasTwoDigitsAfterDecimal = TrailScraperRegex.TrailIdHasTwoDigitsAfterDecimal("PR LP 01.01");
 
-            Assert.True(hasTwoDigitsAfterDecimal);
+            hasTwoDigitsAfterDecimal.Should().BeTrue();
         }
 
 
@@ -116,7 +117,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             bool hasTwoDigitsAfterDecimal = TrailScraperRegex.TrailIdHasTwoDigitsAfterDecimal(trailId);
 
-            Assert.False(hasTwoDigitsAfterDecimal);
+            hasTwoDigitsAfterDecimal.Should().BeFalse();
         }
     }
 }
