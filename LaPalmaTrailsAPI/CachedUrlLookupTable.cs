@@ -41,12 +41,21 @@ namespace LaPalmaTrailsAPI
                 if (!File.Exists(UrlTableLookupFileName)) return false;
 
                 // deserialize from JSON file and check the read worked
-                var dictionary = JsonConvert.DeserializeObject<ConcurrentDictionary<string, string>>
-                    (File.ReadAllText(UrlTableLookupFileName));
-                if (dictionary == null) return false;
+                try
+                {
+                    var dictionary = JsonConvert.DeserializeObject<ConcurrentDictionary<string, string>>
+                        (File.ReadAllText(UrlTableLookupFileName));
 
-                // repopulate the map
-                _urlMap = new ConcurrentDictionary<string, string>(dictionary);
+                    // validate some data was returned
+                    if (dictionary == null || dictionary.Count == 0) return false;
+
+                    // repopulate the map
+                    _urlMap = new ConcurrentDictionary<string, string>(dictionary);
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
                 return true;
             }
         }
