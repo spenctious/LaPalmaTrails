@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -42,6 +43,36 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
+        public void Exisitng_bad_file_is_loaded_returns_false()
+        {
+            // Arrange
+            TestHelper.CreateLookupTableFile(@"{ ""Spanish"" ""English"" }"); // badly formatted JSON
+
+            // Act
+            bool loaded = CachedUrlLookupTable.Instance.LoadFromFile();
+
+            // Assert
+            loaded.Should().Be(false);
+            CachedUrlLookupTable.Instance.Value.Count.Should().Be(0);
+        }
+
+
+        [Fact]
+        public void Exisitng_empty_file_is_loaded_returns_false()
+        {
+            // Arrange
+            TestHelper.CreateLookupTableFile(@"{ }"); // no data
+
+            // Act
+            bool loaded = CachedUrlLookupTable.Instance.LoadFromFile();
+
+            // Assert
+            loaded.Should().Be(false);
+            CachedUrlLookupTable.Instance.Value.Count.Should().Be(0);
+        }
+
+
+        [Fact]
         public void Saving_table_creates_file()
         {
             // Arrange
@@ -63,7 +94,7 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             TestHelper.CreateLookupTableFile(@"{ ""Spanish"": ""German"" }"); // file to be overwritten
-            CachedUrlLookupTable.Instance.Value.Clear();
+            CachedUrlLookupTable.Instance.Value = new ConcurrentDictionary<string, string>();
             CachedUrlLookupTable.Instance.Value.TryAdd("Spanish", "English");
 
             // Act
