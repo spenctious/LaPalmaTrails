@@ -34,6 +34,7 @@ namespace LaPalmaTrailsAPI.Tests
             return scraper;
         }
 
+
         // Minimal valid web page content creator
         public static string StatusPage(string bodyContent)
         {
@@ -51,6 +52,7 @@ namespace LaPalmaTrailsAPI.Tests
                 </body>
                 </html>";
         }
+
 
         // Creates a web page with table of correct id to scrape
         public static string StatusPageWithValidTable(string tableContent)
@@ -70,6 +72,7 @@ namespace LaPalmaTrailsAPI.Tests
                 </table>");
         }
 
+
         // Creates a web page with a valid table with a single row containing a valid open trail
         public static string StatusPageWithWithSingleValidOpenTrail = StatusPageWithValidTable($@"
                 <tr>
@@ -79,6 +82,8 @@ namespace LaPalmaTrailsAPI.Tests
                 </tr>
                 ");
 
+
+        // deletes the file used for url lookup persistence
         public static void DeleteLookupTableFile()
         {
             if (File.Exists(CachedUrlLookupTable.UrlTableLookupFileName))
@@ -87,6 +92,8 @@ namespace LaPalmaTrailsAPI.Tests
             }
         }
 
+
+        // creates a url lookup table file
         public static void CreateLookupTableFile(string contents)
         {
             File.WriteAllText(CachedUrlLookupTable.UrlTableLookupFileName, contents);

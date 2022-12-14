@@ -110,7 +110,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Arrange
             TestHelper.CreateLookupTableFile(@"{ ""Spanish"": ""German"" }"); // file to be overwritten
             CachedUrlLookupTable.Instance.Value = new ConcurrentDictionary<string, string>();
-            CachedUrlLookupTable.Instance.Value.TryAdd("Spanish", "English");
+            CachedUrlLookupTable.Instance.Value.TryAdd("Spanish", "English"); // content different from file
 
             // Act
             CachedUrlLookupTable.Instance.SaveToFile();
