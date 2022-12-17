@@ -63,7 +63,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Assert
             using (new AssertionScope())
             {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+                scraperResult.IsSuccess.Should().BeTrue();
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
@@ -104,7 +104,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().BeEmpty();
 
@@ -142,7 +142,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Anomalies.Should().BeEmpty();
 
@@ -180,7 +180,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
 
@@ -218,7 +218,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
 
@@ -256,7 +256,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
 
@@ -294,7 +294,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Anomalies.Should().BeEmpty();
 
@@ -331,7 +331,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
 
@@ -421,7 +421,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Assert
             using (new AssertionScope())
             {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+                scraperResult.IsSuccess.Should().BeTrue();
                 scraperResult.Result.Message.Should().Be("0 additional page lookups");
             }
 
@@ -459,7 +459,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
@@ -492,7 +492,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
@@ -525,7 +525,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+            scraperResult.IsSuccess.Should().BeTrue();
 
             scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
@@ -568,7 +568,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Assert
             using (new AssertionScope())
             {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+                scraperResult.IsSuccess.Should().BeTrue();
                 scraperResult.Result.Message.Should().Be("73 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("8 anomalies found");
             }
@@ -630,7 +630,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Assert
             using (new AssertionScope())
             {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+                scraperResult.IsSuccess.Should().BeTrue();
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
@@ -656,9 +656,9 @@ namespace LaPalmaTrailsAPI.Tests
             // Arrange
             StatusScraper sut = TestHelper.CreateStatusScraper(useCache: true);
 
-            var outOfDateScraperResult = new ScraperResult();
-            outOfDateScraperResult.Exception("Exception message", "Exception detail");
-            CachedResult.Instance.Value = outOfDateScraperResult;
+            var invalidScraperResult = new ScraperResult();
+            invalidScraperResult.Exception("Exception message", "Exception detail");
+            CachedResult.Instance.Value = invalidScraperResult;
 
             string pageContent = TestHelper.StatusPageWithValidTable($@"
                 <tr>
@@ -679,7 +679,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Assert
             using (new AssertionScope())
             {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
+                scraperResult.IsSuccess.Should().BeTrue();
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
@@ -703,9 +703,9 @@ namespace LaPalmaTrailsAPI.Tests
             // Arrange
             StatusScraper sut = TestHelper.CreateStatusScraper(useCache: true);
 
-            var outOfDateScraperResult = new ScraperResult();
-            outOfDateScraperResult.Success("Success message", "Success detail"); // success automatically sets current date-time
-            CachedResult.Instance.Value = outOfDateScraperResult;
+            var oldScraperResult = new ScraperResult();
+            oldScraperResult.Success("Success message", "Success detail"); // success automatically sets current date-time
+            CachedResult.Instance.Value = oldScraperResult;
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
@@ -716,12 +716,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-                scraperResult.Result.Message.Should().Be("Success message");
-                scraperResult.Result.Detail.Should().Be("Success detail");
-            }
+            scraperResult.Should().BeSameAs(oldScraperResult);
 
             scraperResult.Trails.Should().BeEmpty();
 
