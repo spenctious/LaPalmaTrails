@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Castle.Components.DictionaryAdapter.Xml;
+using FluentAssertions;
+using FluentAssertions.Execution;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,6 +15,8 @@ namespace LaPalmaTrailsAPI.Tests
     [ExcludeFromCodeCoverage]
     internal static class TestHelper
     {
+        #region TEST DATA
+
         // Test data
         public const string StatusPageUrl = "Status page.html";
         public const string LinkToValidDetailPage = "Detail_page.html";
@@ -21,9 +26,12 @@ namespace LaPalmaTrailsAPI.Tests
 
         // Expected text for open trails
         public const string TrailOpen = "Abierto / Open / Geöffnet";
+        public static readonly TrailStatus OpenGr130Etapa1 = new TrailStatus("GR 130 Etapa 1", "Open", "Link_to_English_version.html");
 
+        #endregion
 
-        // Factory method to create status scraper objects in a 'clean' and reproducable state
+        #region FACTORY METHODS
+
         public static StatusScraper CreateStatusScraper(string testPage = StatusPageUrl, bool clearLookups = true, bool useCache = false)
         {
             StatusScraper scraper = new();
@@ -34,6 +42,9 @@ namespace LaPalmaTrailsAPI.Tests
             return scraper;
         }
 
+        #endregion
+
+        #region STATUS PAGE GENERATORS
 
         // Minimal valid web page content creator
         public static string StatusPage(string bodyContent)
@@ -74,7 +85,7 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         // Creates a web page with a valid table with a single row containing a valid open trail
-        public static string StatusPageWithWithSingleValidOpenTrail = StatusPageWithValidTable($@"
+        public static string StatusPageWithWithSingleOpenGr130Etapa1 = StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
                     <td>{IgnoredContent}</td>
@@ -82,6 +93,9 @@ namespace LaPalmaTrailsAPI.Tests
                 </tr>
                 ");
 
+        #endregion
+
+        #region FILE METHODS
 
         // deletes the file used for url lookup persistence
         public static void DeleteLookupTableFile()
@@ -99,7 +113,31 @@ namespace LaPalmaTrailsAPI.Tests
             File.WriteAllText(CachedUrlLookupTable.UrlTableLookupFileName, contents);
         }
 
+        #endregion
+
+        #region ASSERTION EXTENSION METHODS
+
+        public static void ShouldMatch(this ScraperEvent actual, ScraperEvent expected)
+        {
+            using (new AssertionScope())
+            {
+                actual.Type.Should().Be(expected.Type);
+                actual.Message.Should().Be(expected.Message);
+                actual.Detail.Should().Be(expected.Detail);
+            }
+        }
 
 
+        public static void ShouldMatch(this TrailStatus actual, TrailStatus expected)
+        {
+            using (new AssertionScope())
+            {
+                actual.Name.Should().Be(expected.Name);
+                actual.Status.Should().Be(expected.Status);
+                actual.Url.Should().Be(expected.Url);
+            }
+        }
+
+        #endregion
     }
 }

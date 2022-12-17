@@ -66,7 +66,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Arrange
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             var mockStatusScraper = Substitute.For<IStatusScraper>();

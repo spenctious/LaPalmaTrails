@@ -50,34 +50,24 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Valid_trail_scraped_creates_trail_and_success_result()
         {
             // Arrange
-            StatusScraper sut = TestHelper.CreateStatusScraper();
+            var sut = TestHelper.CreateStatusScraper();
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
+
+            var expectedEvent = new ScraperEvent(ScraperEvent.EventType.Success, "1 additional page lookups", "0 anomalies found");
+            var expectedTrail = TestHelper.OpenGr130Etapa1;
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.IsSuccess.Should().BeTrue();
-                scraperResult.Result.Message.Should().Be("1 additional page lookups");
-                scraperResult.Result.Detail.Should().Be("0 anomalies found");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedEvent);
             scraperResult.Anomalies.Should().BeEmpty();
-
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("GR 130 Etapa 1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be("Link_to_English_version.html");
-            }
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
         }
 
 
@@ -100,22 +90,16 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedAnomaly = new ScraperEvent(ScraperEvent.EventType.UnrecognisedTrailId, "Unrecognised trail", "PR 130 Etapa 1");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().BeEmpty();
-
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.UnrecognisedTrailId.ToString());
-                anomaly.Message.Should().Be("Unrecognised trail");
-                anomaly.Detail.Should().Be("PR 130 Etapa 1");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -138,22 +122,17 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedTrail = new TrailStatus("PR LP 03.1", "Open", TestHelper.LinkToEnglishVersion);
+
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Anomalies.Should().BeEmpty();
-
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("PR LP 03.1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be(TestHelper.LinkToEnglishVersion);
-            }
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
         }
 
 
@@ -176,22 +155,16 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedAnomaly = new ScraperEvent(ScraperEvent.EventType.BadRouteLink, "PR LP 01", "No link to route detail");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.BadRouteLink.ToString());
-                anomaly.Message.Should().Be("PR LP 01");
-                anomaly.Detail.Should().Be("No link to route detail");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -209,6 +182,8 @@ namespace LaPalmaTrailsAPI.Tests
                 </tr>
                 ");
 
+            var expectedAnomaly = new ScraperEvent(ScraperEvent.EventType.BadRouteLink, "PR LP 03", "Dummy.zip");
+
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(pageContent),
@@ -219,17 +194,9 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.BadRouteLink.ToString());
-                anomaly.Message.Should().Be("PR LP 03");
-                anomaly.Detail.Should().Be("Dummy.zip");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -252,22 +219,16 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedAnomaly = new ScraperEvent(ScraperEvent.EventType.BadRouteLink, "PR LP 02", "Dummy.pdf");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.BadRouteLink.ToString());
-                anomaly.Message.Should().Be("PR LP 02");
-                anomaly.Detail.Should().Be("Dummy.pdf");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -290,22 +251,17 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedTrail = new TrailStatus("PR LP 01", "Part open", sut.StatusPage);
+
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Anomalies.Should().BeEmpty();
-
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("PR LP 01");
-                trail.Status.Should().Be("Part open");
-                trail.Url.Should().Be(sut.StatusPage);
-            }
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
         }
 
 
@@ -328,21 +284,16 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedAnomaly = new ScraperEvent(ScraperEvent.EventType.UnreadableStatus, "PR LP 01", "Blah blah blah");
+
+            // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.UnreadableStatus.ToString());
-                anomaly.Message.Should().Be("PR LP 01");
-                anomaly.Detail.Should().Be("Blah blah blah");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -355,20 +306,15 @@ namespace LaPalmaTrailsAPI.Tests
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
                 .Returns(Task.FromException<string>(new TaskCanceledException("Status page timed out")));
-            
+
+            var expectedEvent = new ScraperEvent(ScraperEvent.EventType.Timeout, "Status page timed out", sut.StatusPage);
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Timeout.ToString());
-                scraperResult.Result.Message.Should().Be("Status page timed out");
-                scraperResult.Result.Detail.Should().Be(sut.StatusPage);
-            }
-
+            scraperResult.Result.ShouldMatch(expectedEvent);
             scraperResult.Trails.Should().BeEmpty();
-
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -383,19 +329,15 @@ namespace LaPalmaTrailsAPI.Tests
             mockHttpClient.GetStringAsync(Arg.Any<string>())
                 .Returns(Task.FromException<string>(new Exception("Random error")));
 
+            var expectedEvent = new ScraperEvent(ScraperEvent.EventType.Exception, "Cannot read data", "Random error");
+
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Exception.ToString());
-                scraperResult.Result.Message.Should().Be("Cannot read data");
-                scraperResult.Result.Detail.Should().Be("Random error");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedEvent);
             scraperResult.Trails.Should().BeEmpty();
-
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -404,35 +346,23 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task English_URL_not_in_map_gets_added_and_returned()
         {
             // Arrange
-            StatusScraper sut = TestHelper.CreateStatusScraper();
+            StatusScraper sut = TestHelper.CreateStatusScraper(clearLookups: false);
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
-                Task.FromResult(TestHelper.DetailPageWithValidEnglishLink),
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
+
+            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Success, "1 additional page lookups", "0 anomalies found");
+            var expectedTrail = new TrailStatus("GR 130 Etapa 1", "Open", TestHelper.LinkToEnglishVersion);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
-            sut.ClearLookups = false;
-            scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.IsSuccess.Should().BeTrue();
-                scraperResult.Result.Message.Should().Be("0 additional page lookups");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedResult);
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("GR 130 Etapa 1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be(TestHelper.LinkToEnglishVersion);
-            }
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
         }
 
 
@@ -455,24 +385,20 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(@"<link rel=""alternate"" hreflang=""de"" href=""Link_to_German_version.html"" />"));
 
+            var expectedAnomaly = new ScraperEvent(
+                ScraperEvent.EventType.BadRouteLink, 
+                "English URL not found", 
+                "Detail_page_no_English_link.html");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-            TrailStatus trail = scraperResult.Trails[0];
-            trail.Url.Should().Be(sut.StatusPage);
-
+            scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.BadRouteLink.ToString());
-                anomaly.Message.Should().Be("English URL not found");
-                anomaly.Detail.Should().Be("Detail_page_no_English_link.html");
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -484,28 +410,24 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                x => Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                x => Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 x => { throw new TaskCanceledException("Detail page timed out"); }
                 );
+
+            var expectedAnomaly = new ScraperEvent(
+                ScraperEvent.EventType.Timeout, 
+                "Detail page timed out", 
+                TestHelper.LinkToValidDetailPage);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-            TrailStatus trail = scraperResult.Trails[0];
-            trail.Url.Should().Be(sut.StatusPage);
-
+            scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.Timeout.ToString());
-                anomaly.Message.Should().Be("Detail page timed out");
-                anomaly.Detail.Should().Be(TestHelper.LinkToValidDetailPage);
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -517,33 +439,29 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                x => Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                x => Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 x => { throw new Exception("Detail page errored"); }
                 );
+
+            var expectedAnomaly = new ScraperEvent(
+                ScraperEvent.EventType.Exception, 
+                "Detail page errored", 
+                TestHelper.LinkToValidDetailPage);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
             scraperResult.IsSuccess.Should().BeTrue();
-
             scraperResult.Trails.Should().ContainSingle();
-            TrailStatus trail = scraperResult.Trails[0];
-            trail.Url.Should().Be(sut.StatusPage);
-
+            scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
             scraperResult.Anomalies.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                ScraperEvent anomaly = scraperResult.Anomalies[0];
-                anomaly.Type.Should().Be(ScraperEvent.EventType.Exception.ToString());
-                anomaly.Message.Should().Be("Detail page errored");
-                anomaly.Detail.Should().Be(TestHelper.LinkToValidDetailPage);
-            }
+            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
         //
-        // Live snapshot tests - prove validity of test data by showing expected behaviour with real data
+        // Live snapshot tests - prove validity of test data by showing expectedTrail behaviour with real data
         //
 
 
@@ -562,19 +480,14 @@ namespace LaPalmaTrailsAPI.Tests
             mockHttpClient.GetStringAsync(Arg.Is<string>(p => p == TestFile)).Returns(
                 Task.FromResult(pageContent));
 
+            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Success, "73 additional page lookups", "8 anomalies found");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.IsSuccess.Should().BeTrue();
-                scraperResult.Result.Message.Should().Be("73 additional page lookups");
-                scraperResult.Result.Detail.Should().Be("8 anomalies found");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedResult);
             scraperResult.Trails.Should().HaveCount(80);
-
             scraperResult.Anomalies.Should().HaveCount(8);
         }
 
@@ -594,19 +507,17 @@ namespace LaPalmaTrailsAPI.Tests
             mockHttpClient.GetStringAsync(Arg.Is<string>(p => p == TestFile)).Returns(
                 Task.FromResult(pageContent));
 
+            var expectedResult = new ScraperEvent(
+                ScraperEvent.EventType.DataError, 
+                "Trail network probably closed", 
+                "Missing table with id tablepress-14");
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.DataError.ToString());
-                scraperResult.Result.Message.Should().Be("Trail network probably closed");
-                scraperResult.Result.Detail.Should().Be("Missing table with id tablepress-14");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedResult);
             scraperResult.Trails.Should().BeEmpty();
-
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -621,29 +532,23 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 Task.FromResult(detailPageContent));
+
+            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Success, "1 additional page lookups", "0 anomalies found");
+            var expectedTrail = new TrailStatus(
+                "GR 130 Etapa 1", 
+                "Open", 
+                @"https://www.senderosdelapalma.es/en/footpaths/list-of-footpaths/long-distance-footpaths/gr-130-stage-1/");
+
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.IsSuccess.Should().BeTrue();
-                scraperResult.Result.Message.Should().Be("1 additional page lookups");
-                scraperResult.Result.Detail.Should().Be("0 anomalies found");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedResult);
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("GR 130 Etapa 1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be(@"https://www.senderosdelapalma.es/en/footpaths/list-of-footpaths/long-distance-footpaths/gr-130-stage-1/");
-            }
-
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -673,26 +578,16 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Success, "1 additional page lookups", "0 anomalies found");
+            var expectedTrail = new TrailStatus("GR 130 Etapa 1", "Open", TestHelper.LinkToEnglishVersion);
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
 
             // Assert
-            using (new AssertionScope())
-            {
-                scraperResult.IsSuccess.Should().BeTrue();
-                scraperResult.Result.Message.Should().Be("1 additional page lookups");
-                scraperResult.Result.Detail.Should().Be("0 anomalies found");
-            }
-
+            scraperResult.Result.ShouldMatch(expectedResult);
             scraperResult.Trails.Should().ContainSingle();
-            using (new AssertionScope())
-            {
-                TrailStatus trail = scraperResult.Trails[0];
-                trail.Name.Should().Be("GR 130 Etapa 1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be("Link_to_English_version.html");
-            }
-
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -709,7 +604,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleValidOpenTrail),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             // Act
@@ -717,9 +612,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Should().BeSameAs(oldScraperResult);
-
             scraperResult.Trails.Should().BeEmpty();
-
             scraperResult.Anomalies.Should().BeEmpty();
         }
     }
