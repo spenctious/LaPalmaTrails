@@ -13,6 +13,8 @@ namespace LaPalmaTrailsAPI
         public List<TrailStatus> Trails { get { return statuses.ToList(); } }
         public List<ScraperEvent> Anomalies { get { return anomalies.ToList(); } }
 
+        public bool IsSuccess {  get { return result.Type == ScraperEvent.EventType.Success.ToString(); } }
+
 
         public ScraperResult() 
         { 
