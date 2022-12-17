@@ -5,6 +5,7 @@
     /// </summary>
     public sealed class CachedResult
     {
+        const int DaysBeforeOutOfDate = 1;
         private ScraperResult _result = new();
         private readonly object _padlock = new();
 
@@ -30,6 +31,18 @@
         private static readonly Lazy<CachedResult> lazy = new Lazy<CachedResult>(() => new());
 
         public static CachedResult Instance { get { return lazy.Value; } }
+
+        public static bool IsValid
+        {
+            get
+            {
+                // should not be caching anything other than successful results
+                if (!CachedResult.Instance.Value.IsSuccess) return false;
+
+                TimeSpan span = DateTime.Now.Subtract(CachedResult.Instance.Value.LastScraped);
+                return (int)span.TotalDays < DaysBeforeOutOfDate;
+            }
+        }
 
         private CachedResult()
         {

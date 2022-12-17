@@ -129,7 +129,7 @@ namespace LaPalmaTrailsAPI
             int initialUrlMapCount = CachedUrlLookupTable.Instance.Value.Count;
 
             // use the cached result if it's still valid
-            if (LastResultIsStillValid)
+            if (UseCache && CachedResult.IsValid)
             {
                 return CachedResult.Instance.Value;
             }
@@ -269,22 +269,6 @@ namespace LaPalmaTrailsAPI
             }
 
             return detailLink;
-        }
-
-
-
-        /// <summary>
-        /// Returns true if the site was successfully scraped within the last day, false otherwise
-        /// </summary>
-        private bool LastResultIsStillValid
-        {
-            get
-            {
-                if (!UseCache) return false;
-
-                TimeSpan span = DateTime.Now.Subtract(CachedResult.Instance.Value.LastScraped);
-                return (int)span.TotalDays < 1;
-            }
         }
     }
 }
