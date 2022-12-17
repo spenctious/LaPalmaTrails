@@ -67,9 +67,10 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().HaveCount(1);
 
+            scraperResult.Anomalies.Should().BeEmpty();
+
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -104,9 +105,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().BeEmpty();
+
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -141,9 +143,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().HaveCount(1);
 
+            scraperResult.Anomalies.Should().BeEmpty();
+
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -178,9 +181,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
+
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -215,9 +219,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
+
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -252,9 +257,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
+
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -289,9 +295,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().HaveCount(1);
 
+            scraperResult.Anomalies.Should().BeEmpty();
+
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -325,9 +332,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
+
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -358,8 +366,10 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("Status page timed out");
                 scraperResult.Result.Detail.Should().Be(sut.StatusPage);
             }
-            scraperResult.Anomalies.Should().BeEmpty();
+
             scraperResult.Trails.Should().BeEmpty();
+
+            scraperResult.Anomalies.Should().BeEmpty();
         }
 
 
@@ -383,8 +393,10 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("Cannot read data");
                 scraperResult.Result.Detail.Should().Be("Random error");
             }
-            scraperResult.Anomalies.Should().BeEmpty();
+
             scraperResult.Trails.Should().BeEmpty();
+
+            scraperResult.Anomalies.Should().BeEmpty();
         }
 
 
@@ -412,8 +424,8 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
                 scraperResult.Result.Message.Should().Be("0 additional page lookups");
             }
-            scraperResult.Trails.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -448,12 +460,12 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
             trail.Url.Should().Be(sut.StatusPage);
 
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -481,12 +493,12 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
             trail.Url.Should().Be(sut.StatusPage);
 
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -514,12 +526,12 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Result.Type.Should().Be(ScraperEvent.EventType.Success.ToString());
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().HaveCount(1);
 
+            scraperResult.Trails.Should().ContainSingle();
             TrailStatus trail = scraperResult.Trails[0];
             trail.Url.Should().Be(sut.StatusPage);
 
+            scraperResult.Anomalies.Should().ContainSingle();
             using (new AssertionScope())
             {
                 ScraperEvent anomaly = scraperResult.Anomalies[0];
@@ -560,7 +572,9 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("73 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("8 anomalies found");
             }
+
             scraperResult.Trails.Should().HaveCount(80);
+
             scraperResult.Anomalies.Should().HaveCount(8);
         }
 
@@ -590,7 +604,9 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("Trail network probably closed");
                 scraperResult.Result.Detail.Should().Be("Missing table with id tablepress-14");
             }
+
             scraperResult.Trails.Should().BeEmpty();
+
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
@@ -618,9 +634,8 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().BeEmpty();
 
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -628,6 +643,8 @@ namespace LaPalmaTrailsAPI.Tests
                 trail.Status.Should().Be("Open");
                 trail.Url.Should().Be(@"https://www.senderosdelapalma.es/en/footpaths/list-of-footpaths/long-distance-footpaths/gr-130-stage-1/");
             }
+
+            scraperResult.Anomalies.Should().BeEmpty();
         }
 
 
@@ -666,9 +683,8 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("1 additional page lookups");
                 scraperResult.Result.Detail.Should().Be("0 anomalies found");
             }
-            scraperResult.Trails.Should().HaveCount(1);
-            scraperResult.Anomalies.Should().BeEmpty();
 
+            scraperResult.Trails.Should().ContainSingle();
             using (new AssertionScope())
             {
                 TrailStatus trail = scraperResult.Trails[0];
@@ -676,6 +692,8 @@ namespace LaPalmaTrailsAPI.Tests
                 trail.Status.Should().Be("Open");
                 trail.Url.Should().Be("Link_to_English_version.html");
             }
+
+            scraperResult.Anomalies.Should().BeEmpty();
         }
 
 
@@ -704,7 +722,9 @@ namespace LaPalmaTrailsAPI.Tests
                 scraperResult.Result.Message.Should().Be("Success message");
                 scraperResult.Result.Detail.Should().Be("Success detail");
             }
+
             scraperResult.Trails.Should().BeEmpty();
+
             scraperResult.Anomalies.Should().BeEmpty();
         }
     }
