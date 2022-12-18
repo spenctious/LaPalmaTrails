@@ -31,6 +31,13 @@ namespace LaPalmaTrailsAPI
         public bool UseCache { get; set; } = true; // set false to guarantee a fresh result
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
 
+        
+        // Status reporting constants
+        public const string StatusOpen = "Open";
+        public const string StatusPartOpen = "Part open";
+        public const string StatusClosed = "Closed";
+        public const string StatusUnknown = "Unknown";
+
 
         private string GetTrailId(HtmlNode row, ScraperResult scraperResult)
         {
@@ -87,23 +94,23 @@ namespace LaPalmaTrailsAPI
 
         private string GetTrailStatus(HtmlNode row, string trailId, ScraperResult scraperResult)
         {
-            string trailStatus = "Unknown"; // default
+            string trailStatus = StatusUnknown; // default
 
             var status = row.SelectSingleNode("td[position()=3]").InnerText;
             if (TrailScraperRegex.TrailIsOpen(status))
             {
                 if (TrailScraperRegex.TrailIsCompletelyOpen(status))
                 {
-                    trailStatus = "Open";
+                    trailStatus = StatusOpen;
                 }
                 else
                 {
-                    trailStatus = "Part open";
+                    trailStatus = StatusPartOpen;
                 }
             }
             else if (TrailScraperRegex.TrailIsClosed(status))
             {
-                trailStatus = "Closed";
+                trailStatus = StatusClosed;
             }
             else
             {
@@ -174,7 +181,7 @@ namespace LaPalmaTrailsAPI
                     // get status
                     string trailStatus = GetTrailStatus(row, trailId, scraperResult);
                     var status = row.SelectSingleNode("td[position()=3]").InnerText;
-                    if (trailStatus == "Part open")
+                    if (trailStatus == StatusPartOpen || trailStatus == StatusUnknown)
                     {
                         trailUrl = StatusPage; // link to the status page as this is where further details can be found
                     }

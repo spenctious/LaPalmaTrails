@@ -18,7 +18,7 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = TestHelper.StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>{TestHelper.IgnoredContent}</td>
+                    <td>ignored content</td>
                     <td>{TestHelper.TrailOpen}</td>
                 </tr>
                 ");
@@ -66,7 +66,7 @@ namespace LaPalmaTrailsAPI.Tests
             // Arrange
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130Etapa1),
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             var mockStatusScraper = Substitute.For<IStatusScraper>();
@@ -110,7 +110,7 @@ namespace LaPalmaTrailsAPI.Tests
             string pageContent = TestHelper.StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>{TestHelper.IgnoredContent}</td>
+                    <td>ignored content</td>
                     <td>{TestHelper.TrailOpen}</td>
                 </tr>
                 ");
