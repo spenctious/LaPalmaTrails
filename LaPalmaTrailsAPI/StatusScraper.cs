@@ -243,12 +243,12 @@ namespace LaPalmaTrailsAPI
             // if we already have an English version get it, otherwise try to scrape it
             if (!CachedUrlLookupTable.Instance.Value.TryGetValue(spanishUrl, out detailLink))
             {
-                detailLink = StatusPage; // set default
+                detailLink = StatusPage; // default
 
                 var doc = new HtmlDocument();
                 try
                 {
-                    // get the html page source 
+                    // scrape the Spanish detail page 
                     httpClient.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
                     var html = await httpClient.GetStringAsync(spanishUrl);
                     doc.LoadHtml(html);
@@ -267,6 +267,7 @@ namespace LaPalmaTrailsAPI
                         detailLink = englishUrl;
                     }
                 }
+
                 // lookup failures are not fatal so record them as anomalies
                 catch (TaskCanceledException ex)
                 {
