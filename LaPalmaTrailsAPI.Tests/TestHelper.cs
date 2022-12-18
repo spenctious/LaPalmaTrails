@@ -25,6 +25,8 @@ namespace LaPalmaTrailsAPI.Tests
 
         // Expected text for open trails
         public const string TrailOpen = "Abierto / Open / Geöffnet";
+
+        // Shorthand for certain expected values
         public static readonly TrailStatus Gr130_Open_EnglishLink = new TrailStatus(
             "GR 130 Etapa 1", 
             StatusScraper.Status.Open, 
