@@ -27,7 +27,7 @@ namespace LaPalmaTrailsAPI.Tests
         public const string TrailOpen = "Abierto / Open / Geöffnet";
         public static readonly TrailStatus Gr130_Open_EnglishLink = new TrailStatus(
             "GR 130 Etapa 1", 
-            StatusScraper.StatusOpen, 
+            StatusScraper.Status.Open, 
             LinkToEnglishVersion);
 
         public static readonly ScraperEvent SuccessResult_OneLookup_NoAnomalies = new ScraperEvent(

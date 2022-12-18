@@ -29,8 +29,8 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedResult = new ScraperEvent(
                 ScraperEvent.EventType.DataError,
-                "Trail network probably closed",
-                "Missing table with id tablepress-14");
+                StatusScraper.ErrorMessage.NetworkClosed,
+                StatusScraper.ErrorMessage.NetworkClosedDetail);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
@@ -85,7 +85,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedAnomaly = new ScraperEvent(
                 ScraperEvent.EventType.UnrecognisedTrailId, 
-                "Unrecognised trail", 
+                StatusScraper.ErrorMessage.UnrecognisedId, 
                 "PR 130 Etapa 1");
 
             // Act
@@ -118,7 +118,7 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
-            var expectedTrail = new TrailStatus("PR LP 03.1", "Open", TestHelper.LinkToEnglishVersion);
+            var expectedTrail = new TrailStatus("PR LP 03.1", StatusScraper.Status.Open, TestHelper.LinkToEnglishVersion);
 
 
             // Act
@@ -154,7 +154,7 @@ namespace LaPalmaTrailsAPI.Tests
             var expectedAnomaly = new ScraperEvent(
                 ScraperEvent.EventType.BadRouteLink, 
                 "PR LP 01", 
-                "No link to route detail");
+                StatusScraper.ErrorMessage.NoLinkToDetail);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
@@ -250,8 +250,7 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
-            var expectedTrail = new TrailStatus("PR LP 01", "Part open", sut.StatusPage);
-
+            var expectedTrail = new TrailStatus("PR LP 01", StatusScraper.Status.PartOpen, sut.StatusPage);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
@@ -283,7 +282,7 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(pageContent),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
-            var expectedTrail = new TrailStatus("PR LP 01", "Unknown", sut.StatusPage);
+            var expectedTrail = new TrailStatus("PR LP 01", StatusScraper.Status.Unknown, sut.StatusPage);
 
             var expectedAnomaly = new ScraperEvent(
                 ScraperEvent.EventType.UnreadableStatus, 
@@ -307,13 +306,12 @@ namespace LaPalmaTrailsAPI.Tests
         {
             // Arrange
             StatusScraper sut = TestHelper.CreateStatusScraper();
-            string exceptionMessage = "Status page timed out";
 
             var mockHttpClient = Substitute.For<IHttpClient>();
             mockHttpClient.GetStringAsync(Arg.Any<string>())
-                .Returns(Task.FromException<string>(new TaskCanceledException(exceptionMessage)));
+                .Returns(Task.FromException<string>(new TaskCanceledException("Status page timed out")));
 
-            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Timeout, exceptionMessage, sut.StatusPage);
+            var expectedResult = new ScraperEvent(ScraperEvent.EventType.Timeout, "Status page timed out", sut.StatusPage);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
@@ -337,7 +335,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedResult = new ScraperEvent(
                 ScraperEvent.EventType.Exception, 
-                "Cannot read data", 
+                StatusScraper.ErrorMessage.GeneralException, 
                 "Random error");
 
             // Act
@@ -392,7 +390,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedAnomaly = new ScraperEvent(
                 ScraperEvent.EventType.BadRouteLink, 
-                "English URL not found", 
+                StatusScraper.ErrorMessage.EnglishUrlNotFound, 
                 "Detail_page_no_English_link.html");
 
             // Act
@@ -517,8 +515,8 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedResult = new ScraperEvent(
                 ScraperEvent.EventType.DataError, 
-                "Trail network probably closed", 
-                "Missing table with id tablepress-14");
+                StatusScraper.ErrorMessage.NetworkClosed, 
+                StatusScraper.ErrorMessage.NetworkClosedDetail);
 
             // Act
             var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
@@ -545,7 +543,7 @@ namespace LaPalmaTrailsAPI.Tests
 
             var expectedTrail = new TrailStatus(
                 "GR 130 Etapa 1", 
-                "Open", 
+                StatusScraper.Status.Open, 
                 @"https://www.senderosdelapalma.es/en/footpaths/list-of-footpaths/long-distance-footpaths/gr-130-stage-1/");
 
             // Act
