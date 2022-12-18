@@ -20,13 +20,20 @@ namespace LaPalmaTrailsAPI.Tests
         // Test data
         public const string StatusPageUrl = "Status page.html";
         public const string LinkToValidDetailPage = "Detail_page.html";
-        public const string IgnoredContent = "Whatever";
         public const string LinkToEnglishVersion = "Link_to_English_version.html";
         public const string DetailPageWithValidEnglishLink = $@"<link rel=""alternate"" hreflang=""en-us"" href={LinkToEnglishVersion} />";
 
         // Expected text for open trails
         public const string TrailOpen = "Abierto / Open / Geöffnet";
-        public static readonly TrailStatus OpenGr130Etapa1 = new TrailStatus("GR 130 Etapa 1", "Open", "Link_to_English_version.html");
+        public static readonly TrailStatus Gr130_Open_EnglishLink = new TrailStatus(
+            "GR 130 Etapa 1", 
+            StatusScraper.StatusOpen, 
+            LinkToEnglishVersion);
+
+        public static readonly ScraperEvent SuccessResult_OneLookup_NoAnomalies = new ScraperEvent(
+            ScraperEvent.EventType.Success, 
+            "1 additional page lookups", 
+            "0 anomalies found");
 
         #endregion
 
@@ -85,10 +92,10 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         // Creates a web page with a valid table with a single row containing a valid open trail
-        public static string StatusPageWithWithSingleOpenGr130Etapa1 = StatusPageWithValidTable($@"
+        public static string StatusPageWithWithSingleOpenGr130ValidDetailLink = StatusPageWithValidTable($@"
                 <tr>
                     <td><a href={LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>{IgnoredContent}</td>
+                    <td>ignored content</td>
                     <td>{TrailOpen}</td>
                 </tr>
                 ");
