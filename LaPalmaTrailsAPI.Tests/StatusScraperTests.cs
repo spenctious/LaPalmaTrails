@@ -9,9 +9,8 @@ namespace LaPalmaTrailsAPI.Tests
     [ExcludeFromCodeCoverage]
     public class StatusScraperTests
     {
-        //
-        // Tests
-        //
+
+        #region NORMAL OPERATION
 
         [Fact]
         public async Task Invalid_status_table_creates_data_error()
@@ -65,6 +64,41 @@ namespace LaPalmaTrailsAPI.Tests
 
 
         [Fact]
+        public async Task Valid_trail_with_extra_zero_after_decimal_point_is_corrected()
+        {
+            // Arrange
+            StatusScraper sut = TestHelper.CreateStatusScraper();
+
+            string pageContent = TestHelper.StatusPageWithValidTable($@"
+                <tr>
+                    <td><a href={TestHelper.LinkToValidDetailPage}>PR LP 03.01</a></td>
+                    <td>ignored content</td>
+                    <td>{TestHelper.TrailOpen}</td>
+                </tr>
+                ");
+
+            var mockHttpClient = Substitute.For<IHttpClient>();
+            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(pageContent),
+                Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
+
+            var expectedTrail = new TrailStatus("PR LP 03.1", StatusScraper.Status.Open, TestHelper.LinkToEnglishVersion);
+
+            // Act
+            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
+
+            // Assert
+            scraperResult.IsSuccess.Should().BeTrue();
+            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.Trails.Should().ContainSingle();
+            scraperResult.Trails[0].ShouldMatch(expectedTrail);
+        }
+
+        #endregion
+
+        #region TRAIL ERRORS
+
+        [Fact]
         public async Task Invalid_trail_id_results_in_anomaly()
         {
             // Arrange
@@ -96,39 +130,6 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Trails.Should().BeEmpty();
             scraperResult.Anomalies.Should().ContainSingle();
             scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
-        }
-
-
-        [Fact]
-        public async Task Valid_trail_with_extra_zero_after_decimal_point_is_corrected()
-        {
-            // Arrange
-            StatusScraper sut = TestHelper.CreateStatusScraper();
-
-            string pageContent = TestHelper.StatusPageWithValidTable($@"
-                <tr>
-                    <td><a href={TestHelper.LinkToValidDetailPage}>PR LP 03.01</a></td>
-                    <td>ignored content</td>
-                    <td>{TestHelper.TrailOpen}</td>
-                </tr>
-                ");
-
-            var mockHttpClient = Substitute.For<IHttpClient>();
-            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(pageContent),
-                Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
-
-            var expectedTrail = new TrailStatus("PR LP 03.1", StatusScraper.Status.Open, TestHelper.LinkToEnglishVersion);
-
-
-            // Act
-            var scraperResult = await sut.GetTrailStatuses(mockHttpClient);
-
-            // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(expectedTrail);
         }
 
 
@@ -230,6 +231,9 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
+        #endregion
+
+        #region STATUS TESTS
 
         [Fact]
         public async Task Part_open_status_links_to_status_page()
@@ -300,6 +304,9 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
+        #endregion
+
+        #region TIMEOUTS AND EXCEPTIONS
 
         [Fact]
         public async Task Timeout_reading_status_page_creates_timeout_result()
@@ -347,6 +354,9 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Anomalies.Should().BeEmpty();
         }
 
+        #endregion
+
+        #region DETAIL PAGE LOOKUPS
 
         [Fact]
         public async Task English_URL_not_in_map_gets_added_and_returned()
@@ -462,11 +472,9 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
+        #endregion
 
-        //
-        // Live snapshot tests - prove validity of test data by showing expectedTrail behaviour with real data
-        //
-
+        #region LIVE SNAPSHOT TESTS
 
         [Fact]
         public async Task Live_snapshot_network_open_is_scraped_successfully()
@@ -557,7 +565,9 @@ namespace LaPalmaTrailsAPI.Tests
         }
 
 
-        // Caching tests
+        #endregion
+
+        #region CACHING TESTS
 
         [Fact]
         public async Task Invalid_cache_not_used()
@@ -608,5 +618,7 @@ namespace LaPalmaTrailsAPI.Tests
             scraperResult.Trails.Should().BeEmpty();
             scraperResult.Anomalies.Should().BeEmpty();
         }
+
+        #endregion
     }
 }

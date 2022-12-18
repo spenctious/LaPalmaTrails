@@ -19,9 +19,6 @@ namespace LaPalmaTrailsAPI
     /// </summary>
     public class StatusScraper : IStatusScraper
     {
-        // A thread-safe lookup table for converting Spanish URLs to English equivalents
-        //private static PersistentLookupTable _urlMap = new();
-
         /// <summary>
         /// Properties that can be defined by optional API call parameters
         /// </summary>
@@ -32,7 +29,8 @@ namespace LaPalmaTrailsAPI
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
 
         // Output strings
-        public readonly struct Status {
+        public readonly struct Status 
+        {
             public const string Open = "Open";
             public const string PartOpen = "Part open";
             public const string Closed = "Closed";
@@ -49,6 +47,7 @@ namespace LaPalmaTrailsAPI
             public const string EnglishUrlNotFound = "English URL not found";
         }
 
+        // Extracts the trail Id from the first column
         private string GetTrailId(HtmlNode row, ScraperResult scraperResult)
         {
             string trailId = ErrorMessage.UnrecognisedId; // default
@@ -76,6 +75,7 @@ namespace LaPalmaTrailsAPI
         }
 
 
+        // Extracts the link to the Spanish detail page from column 1
         private string GetSpanishDetailLink(HtmlNode row, string trailId, ScraperResult scraperResult)
         {
             var link = row.SelectSingleNode("td[position()=1]//a[@href]");
@@ -102,6 +102,7 @@ namespace LaPalmaTrailsAPI
         }
 
 
+        // Extracts the trail status from column 3
         private string GetTrailStatus(HtmlNode row, string trailId, ScraperResult scraperResult)
         {
             string trailStatus = Status.Unknown; // default
@@ -151,7 +152,6 @@ namespace LaPalmaTrailsAPI
                 return CachedResult.Instance.Value;
             }
 
-
             // scrape the status page
             ScraperResult scraperResult = new();
             var doc = new HtmlDocument();
@@ -161,9 +161,6 @@ namespace LaPalmaTrailsAPI
                 var html = await httpClient.GetStringAsync(StatusPage);
                 doc.LoadHtml(html);
 
-
-                // ********** Find the trail status table
-
                 // extract the table rows that are not header rows and make sure we have a table to parse:
                 // in cases of general trail shutdown (fire alerts etc.) the table may be missing
                 var nodes = doc.DocumentNode.SelectNodes("//table[@id='tablepress-14']//tr[not(th)]");
@@ -172,8 +169,6 @@ namespace LaPalmaTrailsAPI
                     scraperResult.DataError(ErrorMessage.NetworkClosed, ErrorMessage.NetworkClosedDetail);
                     throw new InvalidOperationException();
                 }
-
-                // ********** Parse the table row by row
 
                 foreach (HtmlNode row in nodes)
                 {
@@ -202,8 +197,6 @@ namespace LaPalmaTrailsAPI
                         scraperResult.AddTrailStatus(trailId, trailStatus, trailUrl);
                     }
                 }
-
-                // ********** Status page successfully scraped
 
                 // if we found additional links, update the file version of the lookup table
                 int additionalLookups = CachedUrlLookupTable.Instance.Value.Count - initialUrlMapCount;
@@ -243,7 +236,7 @@ namespace LaPalmaTrailsAPI
         /// <param name="spanishUrl">The link to scrape for the English version.</param>
         /// <param name="scraperResult">The ScraperResult to which any anomalies found are to be added.</param>
         /// <returns>The link to the English language version of the page or the trail status page if not found.</returns>
-        public async Task<string> GetEnglishUrl(IHttpClient webReader, string routeId, string spanishUrl, ScraperResult scraperResult)
+        public async Task<string> GetEnglishUrl(IHttpClient httpClient, string routeId, string spanishUrl, ScraperResult scraperResult)
         {
             string detailLink;
 
@@ -256,8 +249,8 @@ namespace LaPalmaTrailsAPI
                 try
                 {
                     // get the html page source 
-                    webReader.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
-                    var html = await webReader.GetStringAsync(spanishUrl);
+                    httpClient.Timeout = TimeSpan.FromMilliseconds(DetailPageTimeout);
+                    var html = await httpClient.GetStringAsync(spanishUrl);
                     doc.LoadHtml(html);
 
                     // look for the link to the English language version of the page
