@@ -31,17 +31,27 @@ namespace LaPalmaTrailsAPI
         public bool UseCache { get; set; } = true; // set false to guarantee a fresh result
         public bool ClearLookups { get; set; } = false; // build the lookup table fresh each time
 
-        
-        // Status reporting constants
-        public const string StatusOpen = "Open";
-        public const string StatusPartOpen = "Part open";
-        public const string StatusClosed = "Closed";
-        public const string StatusUnknown = "Unknown";
+        // Output strings
+        public readonly struct Status {
+            public const string Open = "Open";
+            public const string PartOpen = "Part open";
+            public const string Closed = "Closed";
+            public const string Unknown = "Unknown";
+        }
 
+        public readonly struct ErrorMessage
+        {
+            public const string UnrecognisedId = "Unrecognised trail";
+            public const string NoLinkToDetail = "No link to route detail";
+            public const string NetworkClosed = "Trail network probably closed";
+            public const string NetworkClosedDetail = "Missing table with id tablepress-14";
+            public const string GeneralException = "Cannot read data";
+            public const string EnglishUrlNotFound = "English URL not found";
+        }
 
         private string GetTrailId(HtmlNode row, ScraperResult scraperResult)
         {
-            string trailId = "Unrecognised trail"; // default
+            string trailId = ErrorMessage.UnrecognisedId; // default
 
             var trail = row.SelectSingleNode("td[position()=1]").InnerText;
             var match = TrailScraperRegex.MatchValidTrailFormats(trail);
@@ -74,7 +84,7 @@ namespace LaPalmaTrailsAPI
             if (scrapedUrl == "failed")
             {
                 // the trail ID column doesn't appear to have a valid link
-                scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, "No link to route detail");
+                scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, trailId, ErrorMessage.NoLinkToDetail);
                 scrapedUrl = StatusPage;
             }
             else
@@ -94,23 +104,23 @@ namespace LaPalmaTrailsAPI
 
         private string GetTrailStatus(HtmlNode row, string trailId, ScraperResult scraperResult)
         {
-            string trailStatus = StatusUnknown; // default
+            string trailStatus = Status.Unknown; // default
 
             var status = row.SelectSingleNode("td[position()=3]").InnerText;
             if (TrailScraperRegex.TrailIsOpen(status))
             {
                 if (TrailScraperRegex.TrailIsCompletelyOpen(status))
                 {
-                    trailStatus = StatusOpen;
+                    trailStatus = Status.Open;
                 }
                 else
                 {
-                    trailStatus = StatusPartOpen;
+                    trailStatus = Status.PartOpen;
                 }
             }
             else if (TrailScraperRegex.TrailIsClosed(status))
             {
-                trailStatus = StatusClosed;
+                trailStatus = Status.Closed;
             }
             else
             {
@@ -159,7 +169,7 @@ namespace LaPalmaTrailsAPI
                 var nodes = doc.DocumentNode.SelectNodes("//table[@id='tablepress-14']//tr[not(th)]");
                 if (nodes == null)
                 {
-                    scraperResult.DataError("Trail network probably closed", "Missing table with id tablepress-14");
+                    scraperResult.DataError(ErrorMessage.NetworkClosed, ErrorMessage.NetworkClosedDetail);
                     throw new InvalidOperationException();
                 }
 
@@ -181,13 +191,13 @@ namespace LaPalmaTrailsAPI
                     // get status
                     string trailStatus = GetTrailStatus(row, trailId, scraperResult);
                     var status = row.SelectSingleNode("td[position()=3]").InnerText;
-                    if (trailStatus == StatusPartOpen || trailStatus == StatusUnknown)
+                    if (trailStatus == Status.PartOpen || trailStatus == Status.Unknown)
                     {
                         trailUrl = StatusPage; // link to the status page as this is where further details can be found
                     }
 
                     // add valid trails to trail list
-                    if (trailId != "Unrecognised trail")
+                    if (trailId != ErrorMessage.UnrecognisedId)
                     {
                         scraperResult.AddTrailStatus(trailId, trailStatus, trailUrl);
                     }
@@ -218,7 +228,7 @@ namespace LaPalmaTrailsAPI
             }
             catch (Exception ex)
             {
-                scraperResult.Exception("Cannot read data", ex.Message);
+                scraperResult.Exception(ErrorMessage.GeneralException, ex.Message);
             }
 
             return scraperResult;
@@ -256,7 +266,7 @@ namespace LaPalmaTrailsAPI
                     string englishUrl = link == null ? "failed" : link.GetAttributeValue("href", "failed");
                     if (englishUrl == "failed")
                     {
-                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, "English URL not found", spanishUrl);
+                        scraperResult.AddAnomaly(ScraperEvent.EventType.BadRouteLink, ErrorMessage.EnglishUrlNotFound, spanishUrl);
                     }
                     else
                     {
