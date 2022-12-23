@@ -2,15 +2,17 @@
 
 namespace LaPalmaTrailsAPI
 {
+    /// <summary>
+    /// Content matching methods
+    /// </summary>
     public class TrailScraperRegex
     {
         public static Match MatchValidTrailFormats(string trail)
         {
-            // trail ID examples:
-            // - GR 130 Etapa 1, GR 131 Etapa 2
-            // - PR LP 01, SL BV 09
-            // - PR LP 01.1
-            // - PR LP 02.01 (the leading 0 after the decimal is an error on their part that must be corrected)
+            // GR 130 Etapa <digit>
+            // GR 131 Etapa <digit>
+            // <PR or SL> <2 upper case letters> <2 or 3 digits>
+            // <PR or SL> <2 upper case letters> <2 or 3 digits>.<digit with or without leading zero>
             return Regex.Match(trail, @"(GR 13(0|1) Etapa \d)|((PR|SL) [A-Z][A-Z] \d{2,3}(\.0\d|\.\d|)?)");
         }
 
