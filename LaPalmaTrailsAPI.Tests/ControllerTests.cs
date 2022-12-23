@@ -15,20 +15,12 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Successful_scrape_returns_trails_anomalies_success_200()
         {
             // Arrange
-            string pageContent = TestHelper.StatusPageWithValidTable($@"
-                <tr>
-                    <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>ignored content</td>
-                    <td>{TestHelper.TrailOpen}</td>
-                </tr>
-                ");
-
-            var mockHttpClient = Substitute.For<IHttpClient>();
-            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(pageContent),
+            var stubHttpClient = Substitute.For<IHttpClient>();
+            stubHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
-            var sut = new TrailStatusesController(mockHttpClient, new StatusScraper());
+            var sut = new TrailStatusesController(stubHttpClient, new StatusScraper());
 
             // Act
             var actionResult = await sut.Get();
@@ -40,23 +32,10 @@ namespace LaPalmaTrailsAPI.Tests
 
             var returnValue = okResult.Value as ScraperResult;
             returnValue.Should().NotBeNull();
-            using (new AssertionScope())
-            {
-                returnValue.Result.Type.Should().Be("Success");
-                returnValue.Result.Message.Should().Be("1 additional page lookups");
-                returnValue.Result.Detail.Should().Be("0 anomalies found");
-            }
-
+            returnValue.Result.ShouldMatch(TestHelper.SuccessResult_OneLookup_NoAnomalies);
             returnValue.Anomalies.Should().BeEmpty();
-            returnValue.Trails.Count.Should().Be(1);
-
-            using (new AssertionScope())
-            {
-                TrailStatus trail = returnValue.Trails[0];
-                trail.Name.Should().Be("GR 130 Etapa 1");
-                trail.Status.Should().Be("Open");
-                trail.Url.Should().Be("Link_to_English_version.html");
-            }
+            returnValue.Trails.Should().ContainSingle();
+            returnValue.Trails[0].ShouldMatch(TestHelper.Gr130_Open_EnglishLink);
         }
 
 
@@ -64,13 +43,13 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Successful_scrape_with_parameters_returns_trails_anomalies_success_200()
         {
             // Arrange
-            var mockHttpClient = Substitute.For<IHttpClient>();
-            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+            var stubHttpClient = Substitute.For<IHttpClient>();
+            stubHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
                 Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             var mockStatusScraper = Substitute.For<IStatusScraper>();
-            mockStatusScraper.GetTrailStatuses(mockHttpClient)
+            mockStatusScraper.GetTrailStatuses(stubHttpClient)
                 .Returns(new ScraperResult());
 
             string nonDefaultUrl        = "https://different.co.uk";
@@ -80,7 +59,7 @@ namespace LaPalmaTrailsAPI.Tests
             bool nonDefaultClearLookups = true;
 
 
-            var sut = new TrailStatusesController(mockHttpClient, mockStatusScraper);
+            var sut = new TrailStatusesController(stubHttpClient, mockStatusScraper);
 
             // Act
             var actionResult = await sut.Get(
@@ -107,24 +86,16 @@ namespace LaPalmaTrailsAPI.Tests
         public async Task Failed_scrape_returns_error_message_server_error_500()
         {
             // Arrange
-            string pageContent = TestHelper.StatusPageWithValidTable($@"
-                <tr>
-                    <td><a href={TestHelper.LinkToValidDetailPage}>GR 130 Etapa 1</a></td>
-                    <td>ignored content</td>
-                    <td>{TestHelper.TrailOpen}</td>
-                </tr>
-                ");
-
-            var mockHttpClient = Substitute.For<IHttpClient>();
-            mockHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
-                Task.FromResult(pageContent),
+            var stubHttpClient = Substitute.For<IHttpClient>();
+            stubHttpClient.GetStringAsync(Arg.Any<string>()).Returns(
+                Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
             var mockStatusScraper = Substitute.For<IStatusScraper>();
-            mockStatusScraper.GetTrailStatuses(mockHttpClient)
+            mockStatusScraper.GetTrailStatuses(stubHttpClient)
                 .Returns(Task.FromException<ScraperResult>(new Exception("error message thrown in GetTrailStatuses")));
 
-            var sut = new TrailStatusesController(mockHttpClient, mockStatusScraper);
+            var sut = new TrailStatusesController(stubHttpClient, mockStatusScraper);
 
             // Act
             var actionResult = await sut.Get("trail status url");
