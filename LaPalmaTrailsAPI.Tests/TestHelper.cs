@@ -1,14 +1,6 @@
-﻿using Castle.Components.DictionaryAdapter.Xml;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentAssertions.Execution;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LaPalmaTrailsAPI.Tests
 {
