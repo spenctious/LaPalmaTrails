@@ -118,6 +118,56 @@ namespace LaPalmaTrailsAPI.Tests
 
         #region ASSERTION EXTENSION METHODS
 
+        public static ScraperResult ShouldBeSuccess(this ScraperResult actual)
+        {
+            actual.IsSuccess.Should().BeTrue();
+            return actual;
+        }
+
+
+        public static ScraperResult ShouldMatchResult(this ScraperResult actual, ScraperEvent expected)
+        {
+            actual.Result.ShouldMatch(expected);
+            return actual;
+        }
+
+        public static ScraperResult HaveNoAnomalies(this ScraperResult actual)
+        {
+            actual.Anomalies.Should().BeEmpty();
+            return actual;
+        }
+
+
+        public static ScraperResult HaveOneAnomalyThatMatches(this ScraperResult actual, ScraperEvent expected)
+        {
+            actual.Anomalies.Should().ContainSingle();
+            actual.Anomalies[0].ShouldMatch(expected);
+            return actual;
+        }
+
+
+        public static ScraperResult HaveOneTrailThatMatches(this ScraperResult actual, TrailStatus expected)
+        {
+            actual.Trails.Should().ContainSingle();
+            actual.Trails[0].ShouldMatch(expected);
+            return actual;
+        }
+
+
+        public static ScraperResult HaveNoTrails(this ScraperResult actual)
+        {
+            actual.Trails.Should().BeEmpty();
+            return actual;
+        }
+
+
+        public static ScraperResult HaveOneTrail(this ScraperResult actual)
+        {
+            actual.Trails.Should().ContainSingle();
+            return actual;
+        }
+
+
         public static void ShouldMatch(this ScraperEvent actual, ScraperEvent expected)
         {
             using (new AssertionScope())
