@@ -35,9 +35,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(expectedResult);
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.ShouldMatchResult(expectedResult).HaveNoTrails().HaveNoAnomalies();
         }
 
 
@@ -56,10 +54,10 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(TestHelper.SuccessResult_OneLookup_NoAnomalies);
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(TestHelper.Gr130_Open_EnglishLink);
+            scraperResult
+                .ShouldMatchResult(TestHelper.SuccessResult_OneLookup_NoAnomalies)
+                .HaveOneTrailThatMatches(TestHelper.Gr130_Open_EnglishLink)
+                .HaveNoAnomalies();
         }
 
 
@@ -88,10 +86,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(expectedTrail);
+            scraperResult.ShouldBeSuccess().HaveNoAnomalies().HaveOneTrailThatMatches(expectedTrail);
         }
 
         #endregion
@@ -126,10 +121,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
+            scraperResult.ShouldBeSuccess().HaveNoTrails().HaveOneAnomalyThatMatches(expectedAnomaly);
         }
 
 
@@ -161,10 +153,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
         }
 
 
@@ -193,10 +182,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
         }
 
 
@@ -225,10 +211,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
         }
 
         #endregion
@@ -260,10 +243,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Anomalies.Should().BeEmpty();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(expectedTrail);
+            scraperResult.ShouldBeSuccess().HaveOneTrailThatMatches(expectedTrail).HaveNoAnomalies();
         }
 
 
@@ -297,11 +277,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(expectedTrail);
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
+            scraperResult.ShouldBeSuccess().HaveOneTrailThatMatches(expectedTrail).HaveOneAnomalyThatMatches(expectedAnomaly);
         }
 
         #endregion
@@ -324,9 +300,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(expectedResult);
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.ShouldMatchResult(expectedResult).HaveNoTrails().HaveNoAnomalies();
         }
 
 
@@ -349,9 +323,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(expectedResult);
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.ShouldMatchResult(expectedResult).HaveNoTrails().HaveNoAnomalies();
         }
 
         #endregion
@@ -369,13 +341,14 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(TestHelper.DetailPageWithValidEnglishLink));
 
+            var expectedResult = TestHelper.SuccessResult_OneLookup_NoAnomalies;
+            var expectedTrail = TestHelper.Gr130_Open_EnglishLink;
+
             // Act
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(TestHelper.SuccessResult_OneLookup_NoAnomalies);
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(TestHelper.Gr130_Open_EnglishLink);
+            scraperResult.ShouldMatchResult(expectedResult).HaveOneTrailThatMatches(expectedTrail).HaveNoAnomalies();
         }
 
 
@@ -407,11 +380,8 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
             scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -436,11 +406,8 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
             scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
 
@@ -465,11 +432,8 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.IsSuccess.Should().BeTrue();
-            scraperResult.Trails.Should().ContainSingle();
+            scraperResult.ShouldBeSuccess().HaveOneTrail().HaveOneAnomalyThatMatches(expectedAnomaly);
             scraperResult.Trails[0].Url.Should().Be(sut.StatusPage);
-            scraperResult.Anomalies.Should().ContainSingle();
-            scraperResult.Anomalies[0].ShouldMatch(expectedAnomaly);
         }
 
         #endregion
@@ -530,9 +494,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(expectedResult);
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.ShouldMatchResult(expectedResult).HaveNoTrails().HaveNoAnomalies();
         }
 
 
@@ -549,6 +511,8 @@ namespace LaPalmaTrailsAPI.Tests
                 Task.FromResult(TestHelper.StatusPageWithWithSingleOpenGr130ValidDetailLink),
                 Task.FromResult(detailPageContent));
 
+            var expectedResult = TestHelper.SuccessResult_OneLookup_NoAnomalies;
+
             var expectedTrail = new TrailStatus(
                 "GR 130 Etapa 1", 
                 StatusScraper.Status.Open, 
@@ -558,10 +522,7 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(TestHelper.SuccessResult_OneLookup_NoAnomalies);
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(expectedTrail);
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult.ShouldMatchResult(expectedResult).HaveOneTrailThatMatches(expectedTrail).HaveNoAnomalies();
         }
 
 
@@ -588,10 +549,10 @@ namespace LaPalmaTrailsAPI.Tests
             var scraperResult = await sut.GetTrailStatuses(stubHttpClient);
 
             // Assert
-            scraperResult.Result.ShouldMatch(TestHelper.SuccessResult_OneLookup_NoAnomalies);
-            scraperResult.Trails.Should().ContainSingle();
-            scraperResult.Trails[0].ShouldMatch(TestHelper.Gr130_Open_EnglishLink);
-            scraperResult.Anomalies.Should().BeEmpty();
+            scraperResult
+                .ShouldMatchResult(TestHelper.SuccessResult_OneLookup_NoAnomalies)
+                .HaveOneTrailThatMatches(TestHelper.Gr130_Open_EnglishLink)
+                .HaveNoAnomalies();
         }
 
 
@@ -615,8 +576,6 @@ namespace LaPalmaTrailsAPI.Tests
 
             // Assert
             scraperResult.Should().BeSameAs(oldScraperResult);
-            scraperResult.Trails.Should().BeEmpty();
-            scraperResult.Anomalies.Should().BeEmpty();
         }
 
         #endregion
